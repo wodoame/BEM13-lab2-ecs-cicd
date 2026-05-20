@@ -1,0 +1,9 @@
+template-file-path: root-stack.yaml
+parameters:
+  GithubOrg: wodoame
+  GithubAppRepo: BEM13-lab2-ecs-app
+  Environment: production
+tags:
+  Project: bem13-lab2-ecs-cicd
+  ManagedBy: CloudFormation
+  Environment: production
