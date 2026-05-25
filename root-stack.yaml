@@ -529,7 +529,7 @@ Resources:
               StringLike:
                 token.actions.githubusercontent.com:sub: !Sub repo:${GithubOrg}/${GithubAppRepo}:*
       Policies:
-        - PolicyName: ECRPush
+        - PolicyName: ECRPushAndS3Deploy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -546,6 +546,14 @@ Resources:
                   - ecr:BatchGetImage
                   - ecr:GetDownloadUrlForLayer
                 Resource: !GetAtt ECRRepository.Arn
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetBucketVersioning
+                Resource:
+                  - !Sub arn:aws:s3:::${ArtifactBucket}
+                  - !Sub arn:aws:s3:::${ArtifactBucket}/*
       Tags:
         - Key: Project
           Value: bem13-lab2-ecs-cicd
@@ -622,56 +630,56 @@ Resources:
         - Key: Project
           Value: bem13-lab2-ecs-cicd
 
-  # CodePipelineRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: bem13-codepipeline-role
-  #     AssumeRolePolicyDocument:
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Service: codepipeline.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     Policies:
-  #       - PolicyName: PipelinePermissions
-  #         PolicyDocument:
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - codedeploy:CreateDeployment
-  #                 - codedeploy:GetDeployment
-  #                 - codedeploy:GetDeploymentConfig
-  #                 - codedeploy:RegisterApplicationRevision
-  #                 - codedeploy:GetApplicationRevision
-  #               Resource: '*'
-  #             - Effect: Allow
-  #               Action:
-  #                 - s3:GetObject
-  #                 - s3:GetObjectVersion
-  #                 - s3:PutObject
-  #                 - s3:GetBucketVersioning
-  #               Resource:
-  #                 - !Sub arn:aws:s3:::${ArtifactBucket}
-  #                 - !Sub arn:aws:s3:::${ArtifactBucket}/*
-  #             - Effect: Allow
-  #               Action:
-  #                 - ecs:DescribeServices
-  #                 - ecs:DescribeTaskDefinition
-  #                 - ecs:RegisterTaskDefinition
-  #               Resource: '*'
-  #             - Effect: Allow
-  #               Action: iam:PassRole
-  #               Resource:
-  #                 - !GetAtt ECSTaskExecutionRole.Arn
-  #                 - !GetAtt ECSTaskRole.Arn
-  #             - Effect: Allow
-  #               Action: ecr:DescribeImages
-  #               Resource: !GetAtt ECRRepository.Arn
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: bem13-codepipeline-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: PipelinePermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codedeploy:CreateDeployment
+                  - codedeploy:GetDeployment
+                  - codedeploy:GetDeploymentConfig
+                  - codedeploy:RegisterApplicationRevision
+                  - codedeploy:GetApplicationRevision
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                  - s3:GetBucketVersioning
+                Resource:
+                  - !Sub arn:aws:s3:::${ArtifactBucket}
+                  - !Sub arn:aws:s3:::${ArtifactBucket}/*
+              - Effect: Allow
+                Action:
+                  - ecs:DescribeServices
+                  - ecs:DescribeTaskDefinition
+                  - ecs:RegisterTaskDefinition
+                Resource: '*'
+              - Effect: Allow
+                Action: iam:PassRole
+                Resource:
+                  - !GetAtt ECSTaskExecutionRole.Arn
+                  - !GetAtt ECSTaskRole.Arn
+              - Effect: Allow
+                Action: ecr:DescribeImages
+                Resource: !GetAtt ECRRepository.Arn
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
   EventBridgePipelineRole:
     Type: AWS::IAM::Role
@@ -923,112 +931,112 @@ Resources:
   # Pipeline Infrastructure
   # ============================================================
 
-  # ArtifactBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Sub bem13-lab2-pipeline-artifacts-${AWS::AccountId}
-  #     VersioningConfiguration:
-  #       Status: Enabled
-  #     BucketEncryption:
-  #       ServerSideEncryptionConfiguration:
-  #         - ServerSideEncryptionByDefault:
-  #             SSEAlgorithm: AES256
-  #     PublicAccessBlockConfiguration:
-  #       BlockPublicAcls: true
-  #       BlockPublicPolicy: true
-  #       IgnorePublicAcls: true
-  #       RestrictPublicBuckets: true
-  #     LifecycleConfiguration:
-  #       Rules:
-  #         - Id: ExpireOldArtifacts
-  #           Status: Enabled
-  #           ExpirationInDays: 30
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub bem13-lab2-pipeline-artifacts-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldArtifacts
+            Status: Enabled
+            ExpirationInDays: 30
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
-  # CodePipeline:
-  #   Type: AWS::CodePipeline::Pipeline
-  #   DependsOn: CodeDeployDeploymentGroup
-  #   Properties:
-  #     Name: bem13-lab2-pipeline
-  #     RoleArn: !GetAtt CodePipelineRole.Arn
-  #     ArtifactStore:
-  #       Type: S3
-  #       Location: !Ref ArtifactBucket
-  #     Stages:
-  #       - Name: Source
-  #         Actions:
-  #           - Name: ECR-Source
-  #             ActionTypeId:
-  #               Category: Source
-  #               Owner: AWS
-  #               Provider: ECR
-  #               Version: '1'
-  #             Configuration:
-  #               RepositoryName: bem13-lab2-app
-  #               ImageTag: latest
-  #             OutputArtifacts:
-  #               - Name: ImageArtifact
-  #             RunOrder: 1
-  #           - Name: S3-Deploy-Config
-  #             ActionTypeId:
-  #               Category: Source
-  #               Owner: AWS
-  #               Provider: S3
-  #               Version: '1'
-  #             Configuration:
-  #               S3Bucket: !Ref ArtifactBucket
-  #               S3ObjectKey: deploy/deploy-bundle.zip
-  #               PollForSourceChanges: 'false'
-  #             OutputArtifacts:
-  #               - Name: DeployArtifact
-  #             RunOrder: 1
-  #       - Name: Deploy
-  #         Actions:
-  #           - Name: BlueGreenDeploy
-  #             ActionTypeId:
-  #               Category: Deploy
-  #               Owner: AWS
-  #               Provider: CodeDeployToECS
-  #               Version: '1'
-  #             Configuration:
-  #               ApplicationName: !Ref CodeDeployApplication
-  #               DeploymentGroupName: !Ref CodeDeployDeploymentGroup
-  #               TaskDefinitionTemplateArtifact: DeployArtifact
-  #               TaskDefinitionTemplatePath: taskdef.json
-  #               AppSpecTemplateArtifact: DeployArtifact
-  #               AppSpecTemplatePath: appspec.yaml
-  #               Image1ArtifactName: ImageArtifact
-  #               Image1ContainerName: IMAGE1_NAME
-  #             InputArtifacts:
-  #               - Name: ImageArtifact
-  #               - Name: DeployArtifact
-  #             RunOrder: 1
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    DependsOn: CodeDeployDeploymentGroup
+    Properties:
+      Name: bem13-lab2-pipeline
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: ECR-Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: ECR
+                Version: '1'
+              Configuration:
+                RepositoryName: bem13-lab2-app
+                ImageTag: latest
+              OutputArtifacts:
+                - Name: ImageArtifact
+              RunOrder: 1
+            - Name: S3-Deploy-Config
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: S3
+                Version: '1'
+              Configuration:
+                S3Bucket: !Ref ArtifactBucket
+                S3ObjectKey: deploy/deploy-bundle.zip
+                PollForSourceChanges: 'false'
+              OutputArtifacts:
+                - Name: DeployArtifact
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: BlueGreenDeploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CodeDeployToECS
+                Version: '1'
+              Configuration:
+                ApplicationName: !Ref CodeDeployApplication
+                DeploymentGroupName: !Ref CodeDeployDeploymentGroup
+                TaskDefinitionTemplateArtifact: DeployArtifact
+                TaskDefinitionTemplatePath: taskdef.json
+                AppSpecTemplateArtifact: DeployArtifact
+                AppSpecTemplatePath: appspec.yaml
+                Image1ArtifactName: ImageArtifact
+                Image1ContainerName: IMAGE1_NAME
+              InputArtifacts:
+                - Name: ImageArtifact
+                - Name: DeployArtifact
+              RunOrder: 1
 
-  # # Triggers the pipeline whenever a new image is pushed to ECR
-  # ECRPushEventRule:
-  #   Type: AWS::Events::Rule
-  #   DependsOn: CodePipeline
-  #   Properties:
-  #     Name: bem13-ecr-image-push
-  #     Description: Trigger CodePipeline on successful ECR image push
-  #     EventPattern:
-  #       source:
-  #         - aws.ecr
-  #       detail-type:
-  #         - ECR Image Action
-  #       detail:
-  #         action-type:
-  #           - PUSH
-  #         result:
-  #           - SUCCESS
-  #         repository-name:
-  #           - bem13-lab2-app
-  #     Targets:
-  #       - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
-  #         Id: TriggerCodePipeline
-  #         RoleArn: !GetAtt EventBridgePipelineRole.Arn
+  # Triggers the pipeline whenever a new image is pushed to ECR
+  ECRPushEventRule:
+    Type: AWS::Events::Rule
+    DependsOn: CodePipeline
+    Properties:
+      Name: bem13-ecr-image-push
+      Description: Trigger CodePipeline on successful ECR image push
+      EventPattern:
+        source:
+          - aws.ecr
+        detail-type:
+          - ECR Image Action
+        detail:
+          action-type:
+            - PUSH
+          result:
+            - SUCCESS
+          repository-name:
+            - bem13-lab2-app
+      Targets:
+        - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
+          Id: TriggerCodePipeline
+          RoleArn: !GetAtt EventBridgePipelineRole.Arn
 
 Outputs:
   GitHubActionsRoleArn:
@@ -1043,17 +1051,17 @@ Outputs:
     Export:
       Name: bem13-lab2-alb-dns
 
-#   ECRRepositoryURI:
-#     Description: ECR repository URI for pushing images
-#     Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/bem13-lab2-app
-#     Export:
-#       Name: bem13-lab2-ecr-uri
+  ECRRepositoryURI:
+    Description: ECR repository URI for pushing images
+    Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/bem13-lab2-app
+    Export:
+      Name: bem13-lab2-ecr-uri
 
-#   ArtifactBucketName:
-#     Description: S3 bucket for CodePipeline artifacts and deploy bundle
-#     Value: !Ref ArtifactBucket
-#     Export:
-#       Name: bem13-lab2-artifact-bucket
+  ArtifactBucketName:
+    Description: S3 bucket for CodePipeline artifacts and deploy bundle
+    Value: !Ref ArtifactBucket
+    Export:
+      Name: bem13-lab2-artifact-bucket
 
   ECSClusterName:
     Description: ECS cluster name

@@ -118,6 +118,54 @@
             "Resource": "*"
         },
         {
+            "Sid": "S3ArtifactBucket",
+            "Effect": "Allow",
+            "Action": [
+                "s3:CreateBucket",
+                "s3:DeleteBucket",
+                "s3:GetBucketPolicy",
+                "s3:PutBucketPolicy",
+                "s3:PutBucketVersioning",
+                "s3:GetBucketVersioning",
+                "s3:PutEncryptionConfiguration",
+                "s3:GetEncryptionConfiguration",
+                "s3:PutLifecycleConfiguration",
+                "s3:GetLifecycleConfiguration",
+                "s3:PutBucketPublicAccessBlock",
+                "s3:GetBucketPublicAccessBlock",
+                "s3:PutBucketTagging",
+                "s3:GetBucketTagging"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CodePipeline",
+            "Effect": "Allow",
+            "Action": [
+                "codepipeline:CreatePipeline",
+                "codepipeline:DeletePipeline",
+                "codepipeline:GetPipeline",
+                "codepipeline:UpdatePipeline",
+                "codepipeline:TagResource",
+                "codepipeline:UntagResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EventBridge",
+            "Effect": "Allow",
+            "Action": [
+                "events:PutRule",
+                "events:DeleteRule",
+                "events:DescribeRule",
+                "events:PutTargets",
+                "events:RemoveTargets",
+                "events:TagResource",
+                "events:UntagResource"
+            ],
+            "Resource": "*"
+        },
+        {
             "Sid": "AutoScaling",
             "Effect": "Allow",
             "Action": [
