@@ -512,52 +512,43 @@ Resources:
         - 6938fd4d98bab03faadb97b34396831e3780aea1
         - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
 
-  # GitHubActionsOIDCRole will be uncommented when ECR and ArtifactBucket are added.
-  # GitHubActionsOIDCRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: bem13-github-actions-oidc-role
-  #     AssumeRolePolicyDocument:
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Federated: !GetAtt GitHubOIDCProvider.Arn
-  #           Action: sts:AssumeRoleWithWebIdentity
-  #           Condition:
-  #             StringEquals:
-  #               token.actions.githubusercontent.com:aud: sts.amazonaws.com
-  #             StringLike:
-  #               token.actions.githubusercontent.com:sub: !Sub repo:${GithubOrg}/${GithubAppRepo}:*
-  #     Policies:
-  #       - PolicyName: ECRPushAndS3Deploy
-  #         PolicyDocument:
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action: ecr:GetAuthorizationToken
-  #               Resource: '*'
-  #             - Effect: Allow
-  #               Action:
-  #                 - ecr:BatchCheckLayerAvailability
-  #                 - ecr:InitiateLayerUpload
-  #                 - ecr:UploadLayerPart
-  #                 - ecr:CompleteLayerUpload
-  #                 - ecr:PutImage
-  #                 - ecr:BatchGetImage
-  #                 - ecr:GetDownloadUrlForLayer
-  #               Resource: !GetAtt ECRRepository.Arn
-  #             - Effect: Allow
-  #               Action:
-  #                 - s3:PutObject
-  #                 - s3:GetObject
-  #                 - s3:GetBucketVersioning
-  #               Resource:
-  #                 - !Sub arn:aws:s3:::${ArtifactBucket}
-  #                 - !Sub arn:aws:s3:::${ArtifactBucket}/*
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  GitHubActionsOIDCRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: bem13-github-actions-oidc-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !GetAtt GitHubOIDCProvider.Arn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GithubOrg}/${GithubAppRepo}:*
+      Policies:
+        - PolicyName: ECRPush
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                  - ecr:PutImage
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                Resource: !GetAtt ECRRepository.Arn
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
   # ============================================================
   # IAM - ECS / CodeDeploy / CodePipeline / EventBridge roles
@@ -1039,7 +1030,13 @@ Resources:
   #         Id: TriggerCodePipeline
   #         RoleArn: !GetAtt EventBridgePipelineRole.Arn
 
-# Outputs:
+Outputs:
+  GitHubActionsRoleArn:
+    Description: IAM role ARN for GitHub Actions OIDC authentication
+    Value: !GetAtt GitHubActionsOIDCRole.Arn
+    Export:
+      Name: bem13-lab2-github-oidc-role-arn
+
 #   ALBDNSName:
 #     Description: Application Load Balancer DNS name
 #     Value: !GetAtt ApplicationLoadBalancer.DNSName
@@ -1051,12 +1048,6 @@ Resources:
 #     Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/bem13-lab2-app
 #     Export:
 #       Name: bem13-lab2-ecr-uri
-
-#   GitHubActionsRoleArn:
-#     Description: IAM role ARN for GitHub Actions OIDC authentication
-#     Value: !GetAtt GitHubActionsOIDCRole.Arn
-#     Export:
-#       Name: bem13-lab2-github-oidc-role-arn
 
 #   ArtifactBucketName:
 #     Description: S3 bucket for CodePipeline artifacts and deploy bundle
