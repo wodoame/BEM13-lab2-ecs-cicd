@@ -1,0 +1,30 @@
+{
+  "family": "bem13-lab2-app",
+  "cpu": "256",
+  "memory": "512",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "executionRoleArn": "arn:aws:iam::741448927703:role/bem13-ecs-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::741448927703:role/bem13-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "bem13-lab2-app",
+      "image": "<IMAGE1_NAME>",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/bem13-lab2-app",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
