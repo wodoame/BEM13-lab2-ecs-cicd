@@ -118,6 +118,32 @@
             "Resource": "*"
         },
         {
+            "Sid": "ECSCluster",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:CreateCluster",
+                "ecs:DeleteCluster",
+                "ecs:DescribeClusters",
+                "ecs:PutClusterCapacityProviders",
+                "ecs:TagResource",
+                "ecs:UntagResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CloudWatchLogs",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:DeleteLogGroup",
+                "logs:DescribeLogGroups",
+                "logs:PutRetentionPolicy",
+                "logs:TagLogGroup",
+                "logs:TagResource"
+            ],
+            "Resource": "*"
+        },
+        {
             "Sid": "IAMRoles",
             "Effect": "Allow",
             "Action": [
