@@ -839,85 +839,85 @@ Resources:
   # Auto Scaling
   # ============================================================
 
-  # AutoScalingTarget:
-  #   Type: AWS::ApplicationAutoScaling::ScalableTarget
-  #   DependsOn: ECSService
-  #   Properties:
-  #     MinCapacity: 1
-  #     MaxCapacity: 4
-  #     ResourceId: !Sub service/${ECSCluster}/${ECSService.Name}
-  #     ScalableDimension: ecs:service:DesiredCount
-  #     ServiceNamespace: ecs
+  AutoScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ECSService
+    Properties:
+      MinCapacity: 1
+      MaxCapacity: 4
+      ResourceId: !Sub service/${ECSCluster}/${ECSService.Name}
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
 
-  # ScaleOutPolicy:
-  #   Type: AWS::ApplicationAutoScaling::ScalingPolicy
-  #   Properties:
-  #     PolicyName: bem13-lab2-scale-out
-  #     PolicyType: StepScaling
-  #     ScalingTargetId: !Ref AutoScalingTarget
-  #     StepScalingPolicyConfiguration:
-  #       AdjustmentType: ChangeInCapacity
-  #       Cooldown: 60
-  #       MetricAggregationType: Average
-  #       StepAdjustments:
-  #         - MetricIntervalLowerBound: 0
-  #           ScalingAdjustment: 1
+  ScaleOutPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: bem13-lab2-scale-out
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref AutoScalingTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 1
 
-  # ScaleInPolicy:
-  #   Type: AWS::ApplicationAutoScaling::ScalingPolicy
-  #   Properties:
-  #     PolicyName: bem13-lab2-scale-in
-  #     PolicyType: StepScaling
-  #     ScalingTargetId: !Ref AutoScalingTarget
-  #     StepScalingPolicyConfiguration:
-  #       AdjustmentType: ChangeInCapacity
-  #       Cooldown: 300
-  #       MetricAggregationType: Average
-  #       StepAdjustments:
-  #         - MetricIntervalUpperBound: 0
-  #           ScalingAdjustment: -1
+  ScaleInPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: bem13-lab2-scale-in
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref AutoScalingTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        Cooldown: 300
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalUpperBound: 0
+            ScalingAdjustment: -1
 
-  # CPUHighAlarm:
-  #   Type: AWS::CloudWatch::Alarm
-  #   Properties:
-  #     AlarmName: bem13-lab2-cpu-high
-  #     AlarmDescription: Scale out when ECS CPU >= 70%
-  #     MetricName: CPUUtilization
-  #     Namespace: AWS/ECS
-  #     Dimensions:
-  #       - Name: ClusterName
-  #         Value: !Ref ECSCluster
-  #       - Name: ServiceName
-  #         Value: !GetAtt ECSService.Name
-  #     Statistic: Average
-  #     Period: 60
-  #     EvaluationPeriods: 2
-  #     Threshold: 70
-  #     ComparisonOperator: GreaterThanOrEqualToThreshold
-  #     AlarmActions:
-  #       - !Ref ScaleOutPolicy
-  #     TreatMissingData: notBreaching
+  CPUHighAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: bem13-lab2-cpu-high
+      AlarmDescription: Scale out when ECS CPU >= 70%
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref ECSCluster
+        - Name: ServiceName
+          Value: !GetAtt ECSService.Name
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 70
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref ScaleOutPolicy
+      TreatMissingData: notBreaching
 
-  # CPULowAlarm:
-  #   Type: AWS::CloudWatch::Alarm
-  #   Properties:
-  #     AlarmName: bem13-lab2-cpu-low
-  #     AlarmDescription: Scale in when ECS CPU <= 30%
-  #     MetricName: CPUUtilization
-  #     Namespace: AWS/ECS
-  #     Dimensions:
-  #       - Name: ClusterName
-  #         Value: !Ref ECSCluster
-  #       - Name: ServiceName
-  #         Value: !GetAtt ECSService.Name
-  #     Statistic: Average
-  #     Period: 60
-  #     EvaluationPeriods: 5
-  #     Threshold: 30
-  #     ComparisonOperator: LessThanOrEqualToThreshold
-  #     AlarmActions:
-  #       - !Ref ScaleInPolicy
-  #     TreatMissingData: notBreaching
+  CPULowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: bem13-lab2-cpu-low
+      AlarmDescription: Scale in when ECS CPU <= 30%
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref ECSCluster
+        - Name: ServiceName
+          Value: !GetAtt ECSService.Name
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 30
+      ComparisonOperator: LessThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref ScaleInPolicy
+      TreatMissingData: notBreaching
 
   # ============================================================
   # Pipeline Infrastructure
