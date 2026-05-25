@@ -128,7 +128,9 @@
                 "iam:DeleteRolePolicy",
                 "iam:GetRolePolicy",
                 "iam:TagRole",
-                "iam:UntagRole"
+                "iam:UntagRole",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy"
             ],
             "Resource": "*"
         }

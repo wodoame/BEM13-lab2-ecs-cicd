@@ -554,73 +554,73 @@ Resources:
   # IAM - ECS / CodeDeploy / CodePipeline / EventBridge roles
   # ============================================================
 
-  # ECSTaskExecutionRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: bem13-ecs-task-execution-role
-  #     AssumeRolePolicyDocument:
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Service: ecs-tasks.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     ManagedPolicyArns:
-  #       - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-  #     Policies:
-  #       - PolicyName: ECRAndLogs
-  #         PolicyDocument:
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action: ecr:GetAuthorizationToken
-  #               Resource: '*'
-  #             - Effect: Allow
-  #               Action:
-  #                 - ecr:BatchCheckLayerAvailability
-  #                 - ecr:GetDownloadUrlForLayer
-  #                 - ecr:BatchGetImage
-  #               Resource: !GetAtt ECRRepository.Arn
-  #             - Effect: Allow
-  #               Action:
-  #                 - logs:CreateLogStream
-  #                 - logs:PutLogEvents
-  #               Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/bem13-lab2-app:*
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: bem13-ecs-task-execution-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: ECRAndLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Resource: !GetAtt ECRRepository.Arn
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/bem13-lab2-app:*
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
-  # ECSTaskRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: bem13-ecs-task-role
-  #     AssumeRolePolicyDocument:
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Service: ecs-tasks.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: bem13-ecs-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
-  # CodeDeployRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: bem13-codedeploy-role
-  #     AssumeRolePolicyDocument:
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Service: codedeploy.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     ManagedPolicyArns:
-  #       - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  CodeDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: bem13-codedeploy-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
   # CodePipelineRole:
   #   Type: AWS::IAM::Role
@@ -673,28 +673,28 @@ Resources:
   #       - Key: Project
   #         Value: bem13-lab2-ecs-cicd
 
-  # EventBridgePipelineRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: bem13-eventbridge-pipeline-role
-  #     AssumeRolePolicyDocument:
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Service: events.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     Policies:
-  #       - PolicyName: TriggerPipeline
-  #         PolicyDocument:
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action: codepipeline:StartPipelineExecution
-  #               Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:bem13-lab2-pipeline
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  EventBridgePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: bem13-eventbridge-pipeline-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: TriggerPipeline
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: codepipeline:StartPipelineExecution
+                Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:bem13-lab2-pipeline
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
   # ============================================================
   # ECS Cluster + Log Group
