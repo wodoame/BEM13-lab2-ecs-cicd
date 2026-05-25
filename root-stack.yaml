@@ -303,121 +303,121 @@ Resources:
   #       - Key: Project
   #         Value: bem13-lab2-ecs-cicd
 
-  # VPCEndpointSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupName: bem13-vpce-sg
-  #     GroupDescription: VPC Interface Endpoints - inbound from private subnets
-  #     VpcId: !Ref VPC
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: 443
-  #         ToPort: 443
-  #         CidrIp: 10.0.11.0/24
-  #         Description: From private subnet 1a
-  #       - IpProtocol: tcp
-  #         FromPort: 443
-  #         ToPort: 443
-  #         CidrIp: 10.0.12.0/24
-  #         Description: From private subnet 1b
-  #     Tags:
-  #       - Key: Name
-  #         Value: bem13-vpce-sg
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  VPCEndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: bem13-vpce-sg
+      GroupDescription: VPC Interface Endpoints - inbound from private subnets
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.11.0/24
+          Description: From private subnet 1a
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.12.0/24
+          Description: From private subnet 1b
+      Tags:
+        - Key: Name
+          Value: bem13-vpce-sg
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
   # ============================================================
   # VPC Endpoints
   # ============================================================
 
-  # ECRApiEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     VpcEndpointType: Interface
-  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
-  #     VpcId: !Ref VPC
-  #     SubnetIds:
-  #       - !Ref PrivateSubnet1a
-  #       - !Ref PrivateSubnet1b
-  #     SecurityGroupIds:
-  #       - !Ref VPCEndpointSecurityGroup
-  #     PrivateDnsEnabled: true
+  ECRApiEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
+      VpcId: !Ref VPC
+      SubnetIds:
+        - !Ref PrivateSubnet1a
+        - !Ref PrivateSubnet1b
+      SecurityGroupIds:
+        - !Ref VPCEndpointSecurityGroup
+      PrivateDnsEnabled: true
 
-  # ECRDkrEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     VpcEndpointType: Interface
-  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
-  #     VpcId: !Ref VPC
-  #     SubnetIds:
-  #       - !Ref PrivateSubnet1a
-  #       - !Ref PrivateSubnet1b
-  #     SecurityGroupIds:
-  #       - !Ref VPCEndpointSecurityGroup
-  #     PrivateDnsEnabled: true
+  ECRDkrEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
+      VpcId: !Ref VPC
+      SubnetIds:
+        - !Ref PrivateSubnet1a
+        - !Ref PrivateSubnet1b
+      SecurityGroupIds:
+        - !Ref VPCEndpointSecurityGroup
+      PrivateDnsEnabled: true
 
-  # # Gateway endpoint for S3 - ECR stores image layers in S3
-  # S3GatewayEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     VpcEndpointType: Gateway
-  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
-  #     VpcId: !Ref VPC
-  #     RouteTableIds:
-  #       - !Ref PrivateRouteTable1a
-  #       - !Ref PrivateRouteTable1b
+  # Gateway endpoint for S3 - ECR stores image layers in S3
+  S3GatewayEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Gateway
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref VPC
+      RouteTableIds:
+        - !Ref PrivateRouteTable1a
+        - !Ref PrivateRouteTable1b
 
-  # CloudWatchLogsEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     VpcEndpointType: Interface
-  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
-  #     VpcId: !Ref VPC
-  #     SubnetIds:
-  #       - !Ref PrivateSubnet1a
-  #       - !Ref PrivateSubnet1b
-  #     SecurityGroupIds:
-  #       - !Ref VPCEndpointSecurityGroup
-  #     PrivateDnsEnabled: true
+  CloudWatchLogsEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
+      VpcId: !Ref VPC
+      SubnetIds:
+        - !Ref PrivateSubnet1a
+        - !Ref PrivateSubnet1b
+      SecurityGroupIds:
+        - !Ref VPCEndpointSecurityGroup
+      PrivateDnsEnabled: true
 
-  # ECSEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     VpcEndpointType: Interface
-  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs
-  #     VpcId: !Ref VPC
-  #     SubnetIds:
-  #       - !Ref PrivateSubnet1a
-  #       - !Ref PrivateSubnet1b
-  #     SecurityGroupIds:
-  #       - !Ref VPCEndpointSecurityGroup
-  #     PrivateDnsEnabled: true
+  ECSEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs
+      VpcId: !Ref VPC
+      SubnetIds:
+        - !Ref PrivateSubnet1a
+        - !Ref PrivateSubnet1b
+      SecurityGroupIds:
+        - !Ref VPCEndpointSecurityGroup
+      PrivateDnsEnabled: true
 
-  # ECSAgentEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     VpcEndpointType: Interface
-  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-agent
-  #     VpcId: !Ref VPC
-  #     SubnetIds:
-  #       - !Ref PrivateSubnet1a
-  #       - !Ref PrivateSubnet1b
-  #     SecurityGroupIds:
-  #       - !Ref VPCEndpointSecurityGroup
-  #     PrivateDnsEnabled: true
+  ECSAgentEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-agent
+      VpcId: !Ref VPC
+      SubnetIds:
+        - !Ref PrivateSubnet1a
+        - !Ref PrivateSubnet1b
+      SecurityGroupIds:
+        - !Ref VPCEndpointSecurityGroup
+      PrivateDnsEnabled: true
 
-  # ECSTelemetryEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     VpcEndpointType: Interface
-  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-telemetry
-  #     VpcId: !Ref VPC
-  #     SubnetIds:
-  #       - !Ref PrivateSubnet1a
-  #       - !Ref PrivateSubnet1b
-  #     SecurityGroupIds:
-  #       - !Ref VPCEndpointSecurityGroup
-  #     PrivateDnsEnabled: true
+  ECSTelemetryEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-telemetry
+      VpcId: !Ref VPC
+      SubnetIds:
+        - !Ref PrivateSubnet1a
+        - !Ref PrivateSubnet1b
+      SecurityGroupIds:
+        - !Ref VPCEndpointSecurityGroup
+      PrivateDnsEnabled: true
 
   # ============================================================
   # Application Load Balancer
