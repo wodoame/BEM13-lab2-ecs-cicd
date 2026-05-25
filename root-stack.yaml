@@ -245,63 +245,63 @@ Resources:
   # Security Groups
   # ============================================================
 
-  # ALBSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupName: bem13-alb-sg
-  #     GroupDescription: ALB - inbound HTTP from internet
-  #     VpcId: !Ref VPC
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: 80
-  #         ToPort: 80
-  #         CidrIp: 0.0.0.0/0
-  #         Description: Production traffic
-  #       - IpProtocol: tcp
-  #         FromPort: 8080
-  #         ToPort: 8080
-  #         CidrIp: 0.0.0.0/0
-  #         Description: CodeDeploy test listener
-  #     Tags:
-  #       - Key: Name
-  #         Value: bem13-alb-sg
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: bem13-alb-sg
+      GroupDescription: ALB - inbound HTTP from internet
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Production traffic
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+          Description: CodeDeploy test listener
+      Tags:
+        - Key: Name
+          Value: bem13-alb-sg
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
-  # # Separate egress rule to avoid circular SG reference at creation time
-  # ALBSecurityGroupEgress:
-  #   Type: AWS::EC2::SecurityGroupEgress
-  #   Properties:
-  #     GroupId: !Ref ALBSecurityGroup
-  #     IpProtocol: tcp
-  #     FromPort: 8080
-  #     ToPort: 8080
-  #     DestinationSecurityGroupId: !Ref ECSSecurityGroup
-  #     Description: Forward to ECS tasks only
+  # Separate egress rule to avoid circular SG reference at creation time
+  ALBSecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref ALBSecurityGroup
+      IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+      DestinationSecurityGroupId: !Ref ECSSecurityGroup
+      Description: Forward to ECS tasks only
 
-  # ECSSecurityGroup:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupName: bem13-ecs-sg
-  #     GroupDescription: ECS tasks - inbound from ALB only
-  #     VpcId: !Ref VPC
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: 8080
-  #         ToPort: 8080
-  #         SourceSecurityGroupId: !Ref ALBSecurityGroup
-  #         Description: From ALB
-  #     SecurityGroupEgress:
-  #       - IpProtocol: tcp
-  #         FromPort: 443
-  #         ToPort: 443
-  #         CidrIp: 0.0.0.0/0
-  #         Description: HTTPS out via VPC endpoints or NAT
-  #     Tags:
-  #       - Key: Name
-  #         Value: bem13-ecs-sg
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: bem13-ecs-sg
+      GroupDescription: ECS tasks - inbound from ALB only
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: From ALB
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS out via VPC endpoints or NAT
+      Tags:
+        - Key: Name
+          Value: bem13-ecs-sg
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
   VPCEndpointSecurityGroup:
     Type: AWS::EC2::SecurityGroup
