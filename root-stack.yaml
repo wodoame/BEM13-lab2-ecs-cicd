@@ -16,35 +16,31 @@ Parameters:
     Type: String
     Default: production
 
-# NOTE: On first deploy, ECS tasks start with a placeholder nginx image.
-# They will reach ECS steady state but ALB health checks will fail until
-# the first real image is pushed via GitHub Actions CI.
-
 Resources:
 
   # ============================================================
   # ECR Repository
   # ============================================================
 
-  ECRRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: bem13-lab2-app
-      ImageScanningConfiguration:
-        ScanOnPush: true
-      ImageTagMutability: MUTABLE
-      LifecyclePolicy:
-        LifecyclePolicyText: >
-          {"rules":[{"rulePriority":1,"description":"Keep last 10 images",
-          "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":10},
-          "action":{"type":"expire"}}]}
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
+  # ECRRepository:
+  #   Type: AWS::ECR::Repository
+  #   Properties:
+  #     RepositoryName: bem13-lab2-app
+  #     ImageScanningConfiguration:
+  #       ScanOnPush: true
+  #     ImageTagMutability: MUTABLE
+  #     LifecyclePolicy:
+  #       LifecyclePolicyText: >
+  #         {"rules":[{"rulePriority":1,"description":"Keep last 10 images",
+  #         "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":10},
+  #         "action":{"type":"expire"}}]}
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: ManagedBy
+  #         Value: CloudFormation
 
   # ============================================================
   # VPC
@@ -249,257 +245,257 @@ Resources:
   # Security Groups
   # ============================================================
 
-  ALBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: bem13-alb-sg
-      GroupDescription: ALB - inbound HTTP from internet
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-          Description: Production traffic
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
-          CidrIp: 0.0.0.0/0
-          Description: CodeDeploy test listener
-      Tags:
-        - Key: Name
-          Value: bem13-alb-sg
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # ALBSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupName: bem13-alb-sg
+  #     GroupDescription: ALB - inbound HTTP from internet
+  #     VpcId: !Ref VPC
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: 0.0.0.0/0
+  #         Description: Production traffic
+  #       - IpProtocol: tcp
+  #         FromPort: 8080
+  #         ToPort: 8080
+  #         CidrIp: 0.0.0.0/0
+  #         Description: CodeDeploy test listener
+  #     Tags:
+  #       - Key: Name
+  #         Value: bem13-alb-sg
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  # Separate egress rule to avoid circular SG reference at creation time
-  ALBSecurityGroupEgress:
-    Type: AWS::EC2::SecurityGroupEgress
-    Properties:
-      GroupId: !Ref ALBSecurityGroup
-      IpProtocol: tcp
-      FromPort: 8080
-      ToPort: 8080
-      DestinationSecurityGroupId: !Ref ECSSecurityGroup
-      Description: Forward to ECS tasks only
+  # # Separate egress rule to avoid circular SG reference at creation time
+  # ALBSecurityGroupEgress:
+  #   Type: AWS::EC2::SecurityGroupEgress
+  #   Properties:
+  #     GroupId: !Ref ALBSecurityGroup
+  #     IpProtocol: tcp
+  #     FromPort: 8080
+  #     ToPort: 8080
+  #     DestinationSecurityGroupId: !Ref ECSSecurityGroup
+  #     Description: Forward to ECS tasks only
 
-  ECSSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: bem13-ecs-sg
-      GroupDescription: ECS tasks - inbound from ALB only
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
-          SourceSecurityGroupId: !Ref ALBSecurityGroup
-          Description: From ALB
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-          Description: HTTPS out via VPC endpoints or NAT
-      Tags:
-        - Key: Name
-          Value: bem13-ecs-sg
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # ECSSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupName: bem13-ecs-sg
+  #     GroupDescription: ECS tasks - inbound from ALB only
+  #     VpcId: !Ref VPC
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         FromPort: 8080
+  #         ToPort: 8080
+  #         SourceSecurityGroupId: !Ref ALBSecurityGroup
+  #         Description: From ALB
+  #     SecurityGroupEgress:
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: 0.0.0.0/0
+  #         Description: HTTPS out via VPC endpoints or NAT
+  #     Tags:
+  #       - Key: Name
+  #         Value: bem13-ecs-sg
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  VPCEndpointSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: bem13-vpce-sg
-      GroupDescription: VPC Interface Endpoints - inbound from private subnets
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 10.0.11.0/24
-          Description: From private subnet 1a
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 10.0.12.0/24
-          Description: From private subnet 1b
-      Tags:
-        - Key: Name
-          Value: bem13-vpce-sg
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # VPCEndpointSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupName: bem13-vpce-sg
+  #     GroupDescription: VPC Interface Endpoints - inbound from private subnets
+  #     VpcId: !Ref VPC
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: 10.0.11.0/24
+  #         Description: From private subnet 1a
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: 10.0.12.0/24
+  #         Description: From private subnet 1b
+  #     Tags:
+  #       - Key: Name
+  #         Value: bem13-vpce-sg
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
   # ============================================================
   # VPC Endpoints
   # ============================================================
 
-  ECRApiEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcEndpointType: Interface
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
-      VpcId: !Ref VPC
-      SubnetIds:
-        - !Ref PrivateSubnet1a
-        - !Ref PrivateSubnet1b
-      SecurityGroupIds:
-        - !Ref VPCEndpointSecurityGroup
-      PrivateDnsEnabled: true
+  # ECRApiEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     VpcEndpointType: Interface
+  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
+  #     VpcId: !Ref VPC
+  #     SubnetIds:
+  #       - !Ref PrivateSubnet1a
+  #       - !Ref PrivateSubnet1b
+  #     SecurityGroupIds:
+  #       - !Ref VPCEndpointSecurityGroup
+  #     PrivateDnsEnabled: true
 
-  ECRDkrEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcEndpointType: Interface
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
-      VpcId: !Ref VPC
-      SubnetIds:
-        - !Ref PrivateSubnet1a
-        - !Ref PrivateSubnet1b
-      SecurityGroupIds:
-        - !Ref VPCEndpointSecurityGroup
-      PrivateDnsEnabled: true
+  # ECRDkrEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     VpcEndpointType: Interface
+  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
+  #     VpcId: !Ref VPC
+  #     SubnetIds:
+  #       - !Ref PrivateSubnet1a
+  #       - !Ref PrivateSubnet1b
+  #     SecurityGroupIds:
+  #       - !Ref VPCEndpointSecurityGroup
+  #     PrivateDnsEnabled: true
 
-  # Gateway endpoint for S3 - ECR stores image layers in S3
-  S3GatewayEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcEndpointType: Gateway
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
-      VpcId: !Ref VPC
-      RouteTableIds:
-        - !Ref PrivateRouteTable1a
-        - !Ref PrivateRouteTable1b
+  # # Gateway endpoint for S3 - ECR stores image layers in S3
+  # S3GatewayEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     VpcEndpointType: Gateway
+  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+  #     VpcId: !Ref VPC
+  #     RouteTableIds:
+  #       - !Ref PrivateRouteTable1a
+  #       - !Ref PrivateRouteTable1b
 
-  CloudWatchLogsEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcEndpointType: Interface
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
-      VpcId: !Ref VPC
-      SubnetIds:
-        - !Ref PrivateSubnet1a
-        - !Ref PrivateSubnet1b
-      SecurityGroupIds:
-        - !Ref VPCEndpointSecurityGroup
-      PrivateDnsEnabled: true
+  # CloudWatchLogsEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     VpcEndpointType: Interface
+  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
+  #     VpcId: !Ref VPC
+  #     SubnetIds:
+  #       - !Ref PrivateSubnet1a
+  #       - !Ref PrivateSubnet1b
+  #     SecurityGroupIds:
+  #       - !Ref VPCEndpointSecurityGroup
+  #     PrivateDnsEnabled: true
 
-  ECSEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcEndpointType: Interface
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs
-      VpcId: !Ref VPC
-      SubnetIds:
-        - !Ref PrivateSubnet1a
-        - !Ref PrivateSubnet1b
-      SecurityGroupIds:
-        - !Ref VPCEndpointSecurityGroup
-      PrivateDnsEnabled: true
+  # ECSEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     VpcEndpointType: Interface
+  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs
+  #     VpcId: !Ref VPC
+  #     SubnetIds:
+  #       - !Ref PrivateSubnet1a
+  #       - !Ref PrivateSubnet1b
+  #     SecurityGroupIds:
+  #       - !Ref VPCEndpointSecurityGroup
+  #     PrivateDnsEnabled: true
 
-  ECSAgentEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcEndpointType: Interface
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-agent
-      VpcId: !Ref VPC
-      SubnetIds:
-        - !Ref PrivateSubnet1a
-        - !Ref PrivateSubnet1b
-      SecurityGroupIds:
-        - !Ref VPCEndpointSecurityGroup
-      PrivateDnsEnabled: true
+  # ECSAgentEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     VpcEndpointType: Interface
+  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-agent
+  #     VpcId: !Ref VPC
+  #     SubnetIds:
+  #       - !Ref PrivateSubnet1a
+  #       - !Ref PrivateSubnet1b
+  #     SecurityGroupIds:
+  #       - !Ref VPCEndpointSecurityGroup
+  #     PrivateDnsEnabled: true
 
-  ECSTelemetryEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      VpcEndpointType: Interface
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-telemetry
-      VpcId: !Ref VPC
-      SubnetIds:
-        - !Ref PrivateSubnet1a
-        - !Ref PrivateSubnet1b
-      SecurityGroupIds:
-        - !Ref VPCEndpointSecurityGroup
-      PrivateDnsEnabled: true
+  # ECSTelemetryEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     VpcEndpointType: Interface
+  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-telemetry
+  #     VpcId: !Ref VPC
+  #     SubnetIds:
+  #       - !Ref PrivateSubnet1a
+  #       - !Ref PrivateSubnet1b
+  #     SecurityGroupIds:
+  #       - !Ref VPCEndpointSecurityGroup
+  #     PrivateDnsEnabled: true
 
   # ============================================================
   # Application Load Balancer
   # ============================================================
 
-  ApplicationLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Name: bem13-lab2-alb
-      Scheme: internet-facing
-      Type: application
-      Subnets:
-        - !Ref PublicSubnet1a
-        - !Ref PublicSubnet1b
-      SecurityGroups:
-        - !Ref ALBSecurityGroup
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
-        - Key: Environment
-          Value: !Ref Environment
+  # ApplicationLoadBalancer:
+  #   Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  #   Properties:
+  #     Name: bem13-lab2-alb
+  #     Scheme: internet-facing
+  #     Type: application
+  #     Subnets:
+  #       - !Ref PublicSubnet1a
+  #       - !Ref PublicSubnet1b
+  #     SecurityGroups:
+  #       - !Ref ALBSecurityGroup
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
+  #       - Key: Environment
+  #         Value: !Ref Environment
 
-  BlueTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: bem13-blue-tg
-      Port: 8080
-      Protocol: HTTP
-      VpcId: !Ref VPC
-      TargetType: ip
-      HealthCheckPath: /health
-      HealthCheckIntervalSeconds: 30
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 3
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # BlueTargetGroup:
+  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  #   Properties:
+  #     Name: bem13-blue-tg
+  #     Port: 8080
+  #     Protocol: HTTP
+  #     VpcId: !Ref VPC
+  #     TargetType: ip
+  #     HealthCheckPath: /health
+  #     HealthCheckIntervalSeconds: 30
+  #     HealthCheckTimeoutSeconds: 5
+  #     HealthyThresholdCount: 2
+  #     UnhealthyThresholdCount: 3
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  GreenTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: bem13-green-tg
-      Port: 8080
-      Protocol: HTTP
-      VpcId: !Ref VPC
-      TargetType: ip
-      HealthCheckPath: /health
-      HealthCheckIntervalSeconds: 30
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 3
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # GreenTargetGroup:
+  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  #   Properties:
+  #     Name: bem13-green-tg
+  #     Port: 8080
+  #     Protocol: HTTP
+  #     VpcId: !Ref VPC
+  #     TargetType: ip
+  #     HealthCheckPath: /health
+  #     HealthCheckIntervalSeconds: 30
+  #     HealthCheckTimeoutSeconds: 5
+  #     HealthyThresholdCount: 2
+  #     UnhealthyThresholdCount: 3
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  ProductionListener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      LoadBalancerArn: !Ref ApplicationLoadBalancer
-      Port: 80
-      Protocol: HTTP
-      DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref BlueTargetGroup
+  # ProductionListener:
+  #   Type: AWS::ElasticLoadBalancingV2::Listener
+  #   Properties:
+  #     LoadBalancerArn: !Ref ApplicationLoadBalancer
+  #     Port: 80
+  #     Protocol: HTTP
+  #     DefaultActions:
+  #       - Type: forward
+  #         TargetGroupArn: !Ref BlueTargetGroup
 
-  TestListener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      LoadBalancerArn: !Ref ApplicationLoadBalancer
-      Port: 8080
-      Protocol: HTTP
-      DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref GreenTargetGroup
+  # TestListener:
+  #   Type: AWS::ElasticLoadBalancingV2::Listener
+  #   Properties:
+  #     LoadBalancerArn: !Ref ApplicationLoadBalancer
+  #     Port: 8080
+  #     Protocol: HTTP
+  #     DefaultActions:
+  #       - Type: forward
+  #         TargetGroupArn: !Ref GreenTargetGroup
 
   # ============================================================
-  # IAM
+  # IAM - GitHub OIDC (GitSync setup)
   # ============================================================
 
   # DeletionPolicy: Retain because only one OIDC provider per URL is
@@ -516,559 +512,560 @@ Resources:
         - 6938fd4d98bab03faadb97b34396831e3780aea1
         - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
 
-  ECSTaskExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: bem13-ecs-task-execution-role
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-      Policies:
-        - PolicyName: ECRAndLogs
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action: ecr:GetAuthorizationToken
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - ecr:BatchCheckLayerAvailability
-                  - ecr:GetDownloadUrlForLayer
-                  - ecr:BatchGetImage
-                Resource: !GetAtt ECRRepository.Arn
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/bem13-lab2-app:*
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # GitHubActionsOIDCRole will be uncommented when ECR and ArtifactBucket are added.
+  # GitHubActionsOIDCRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: bem13-github-actions-oidc-role
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Federated: !GetAtt GitHubOIDCProvider.Arn
+  #           Action: sts:AssumeRoleWithWebIdentity
+  #           Condition:
+  #             StringEquals:
+  #               token.actions.githubusercontent.com:aud: sts.amazonaws.com
+  #             StringLike:
+  #               token.actions.githubusercontent.com:sub: !Sub repo:${GithubOrg}/${GithubAppRepo}:*
+  #     Policies:
+  #       - PolicyName: ECRPushAndS3Deploy
+  #         PolicyDocument:
+  #           Version: '2012-10-17'
+  #           Statement:
+  #             - Effect: Allow
+  #               Action: ecr:GetAuthorizationToken
+  #               Resource: '*'
+  #             - Effect: Allow
+  #               Action:
+  #                 - ecr:BatchCheckLayerAvailability
+  #                 - ecr:InitiateLayerUpload
+  #                 - ecr:UploadLayerPart
+  #                 - ecr:CompleteLayerUpload
+  #                 - ecr:PutImage
+  #                 - ecr:BatchGetImage
+  #                 - ecr:GetDownloadUrlForLayer
+  #               Resource: !GetAtt ECRRepository.Arn
+  #             - Effect: Allow
+  #               Action:
+  #                 - s3:PutObject
+  #                 - s3:GetObject
+  #                 - s3:GetBucketVersioning
+  #               Resource:
+  #                 - !Sub arn:aws:s3:::${ArtifactBucket}
+  #                 - !Sub arn:aws:s3:::${ArtifactBucket}/*
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  ECSTaskRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: bem13-ecs-task-role
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: sts:AssumeRole
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # ============================================================
+  # IAM - ECS / CodeDeploy / CodePipeline / EventBridge roles
+  # ============================================================
 
-  CodeDeployRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: bem13-codedeploy-role
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codedeploy.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # ECSTaskExecutionRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: bem13-ecs-task-execution-role
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: ecs-tasks.amazonaws.com
+  #           Action: sts:AssumeRole
+  #     ManagedPolicyArns:
+  #       - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+  #     Policies:
+  #       - PolicyName: ECRAndLogs
+  #         PolicyDocument:
+  #           Version: '2012-10-17'
+  #           Statement:
+  #             - Effect: Allow
+  #               Action: ecr:GetAuthorizationToken
+  #               Resource: '*'
+  #             - Effect: Allow
+  #               Action:
+  #                 - ecr:BatchCheckLayerAvailability
+  #                 - ecr:GetDownloadUrlForLayer
+  #                 - ecr:BatchGetImage
+  #               Resource: !GetAtt ECRRepository.Arn
+  #             - Effect: Allow
+  #               Action:
+  #                 - logs:CreateLogStream
+  #                 - logs:PutLogEvents
+  #               Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/ecs/bem13-lab2-app:*
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  CodePipelineRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: bem13-codepipeline-role
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codepipeline.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: PipelinePermissions
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - codedeploy:CreateDeployment
-                  - codedeploy:GetDeployment
-                  - codedeploy:GetDeploymentConfig
-                  - codedeploy:RegisterApplicationRevision
-                  - codedeploy:GetApplicationRevision
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:PutObject
-                  - s3:GetBucketVersioning
-                Resource:
-                  - !Sub arn:aws:s3:::${ArtifactBucket}
-                  - !Sub arn:aws:s3:::${ArtifactBucket}/*
-              - Effect: Allow
-                Action:
-                  - ecs:DescribeServices
-                  - ecs:DescribeTaskDefinition
-                  - ecs:RegisterTaskDefinition
-                Resource: '*'
-              - Effect: Allow
-                Action: iam:PassRole
-                Resource:
-                  - !GetAtt ECSTaskExecutionRole.Arn
-                  - !GetAtt ECSTaskRole.Arn
-              - Effect: Allow
-                Action: ecr:DescribeImages
-                Resource: !GetAtt ECRRepository.Arn
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # ECSTaskRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: bem13-ecs-task-role
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: ecs-tasks.amazonaws.com
+  #           Action: sts:AssumeRole
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  GitHubActionsOIDCRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: bem13-github-actions-oidc-role
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Federated: !GetAtt GitHubOIDCProvider.Arn
-            Action: sts:AssumeRoleWithWebIdentity
-            Condition:
-              StringEquals:
-                token.actions.githubusercontent.com:aud: sts.amazonaws.com
-              StringLike:
-                token.actions.githubusercontent.com:sub: !Sub repo:${GithubOrg}/${GithubAppRepo}:*
-      Policies:
-        - PolicyName: ECRPushAndS3Deploy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action: ecr:GetAuthorizationToken
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - ecr:BatchCheckLayerAvailability
-                  - ecr:InitiateLayerUpload
-                  - ecr:UploadLayerPart
-                  - ecr:CompleteLayerUpload
-                  - ecr:PutImage
-                  - ecr:BatchGetImage
-                  - ecr:GetDownloadUrlForLayer
-                Resource: !GetAtt ECRRepository.Arn
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                  - s3:GetBucketVersioning
-                Resource:
-                  - !Sub arn:aws:s3:::${ArtifactBucket}
-                  - !Sub arn:aws:s3:::${ArtifactBucket}/*
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # CodeDeployRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: bem13-codedeploy-role
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: codedeploy.amazonaws.com
+  #           Action: sts:AssumeRole
+  #     ManagedPolicyArns:
+  #       - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  EventBridgePipelineRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: bem13-eventbridge-pipeline-role
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: events.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: TriggerPipeline
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action: codepipeline:StartPipelineExecution
-                Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:bem13-lab2-pipeline
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # CodePipelineRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: bem13-codepipeline-role
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: codepipeline.amazonaws.com
+  #           Action: sts:AssumeRole
+  #     Policies:
+  #       - PolicyName: PipelinePermissions
+  #         PolicyDocument:
+  #           Version: '2012-10-17'
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - codedeploy:CreateDeployment
+  #                 - codedeploy:GetDeployment
+  #                 - codedeploy:GetDeploymentConfig
+  #                 - codedeploy:RegisterApplicationRevision
+  #                 - codedeploy:GetApplicationRevision
+  #               Resource: '*'
+  #             - Effect: Allow
+  #               Action:
+  #                 - s3:GetObject
+  #                 - s3:GetObjectVersion
+  #                 - s3:PutObject
+  #                 - s3:GetBucketVersioning
+  #               Resource:
+  #                 - !Sub arn:aws:s3:::${ArtifactBucket}
+  #                 - !Sub arn:aws:s3:::${ArtifactBucket}/*
+  #             - Effect: Allow
+  #               Action:
+  #                 - ecs:DescribeServices
+  #                 - ecs:DescribeTaskDefinition
+  #                 - ecs:RegisterTaskDefinition
+  #               Resource: '*'
+  #             - Effect: Allow
+  #               Action: iam:PassRole
+  #               Resource:
+  #                 - !GetAtt ECSTaskExecutionRole.Arn
+  #                 - !GetAtt ECSTaskRole.Arn
+  #             - Effect: Allow
+  #               Action: ecr:DescribeImages
+  #               Resource: !GetAtt ECRRepository.Arn
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
+
+  # EventBridgePipelineRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: bem13-eventbridge-pipeline-role
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: events.amazonaws.com
+  #           Action: sts:AssumeRole
+  #     Policies:
+  #       - PolicyName: TriggerPipeline
+  #         PolicyDocument:
+  #           Version: '2012-10-17'
+  #           Statement:
+  #             - Effect: Allow
+  #               Action: codepipeline:StartPipelineExecution
+  #               Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:bem13-lab2-pipeline
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
   # ============================================================
   # ECS Cluster + Log Group
   # ============================================================
 
-  ECSCluster:
-    Type: AWS::ECS::Cluster
-    Properties:
-      ClusterName: bem13-lab2-cluster
-      ClusterSettings:
-        - Name: containerInsights
-          Value: enabled
-      CapacityProviders:
-        - FARGATE
-        - FARGATE_SPOT
-      DefaultCapacityProviderStrategy:
-        - CapacityProvider: FARGATE
-          Weight: 1
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
-        - Key: Environment
-          Value: !Ref Environment
+  # ECSCluster:
+  #   Type: AWS::ECS::Cluster
+  #   Properties:
+  #     ClusterName: bem13-lab2-cluster
+  #     ClusterSettings:
+  #       - Name: containerInsights
+  #         Value: enabled
+  #     CapacityProviders:
+  #       - FARGATE
+  #       - FARGATE_SPOT
+  #     DefaultCapacityProviderStrategy:
+  #       - CapacityProvider: FARGATE
+  #         Weight: 1
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
+  #       - Key: Environment
+  #         Value: !Ref Environment
 
-  ECSLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: /ecs/bem13-lab2-app
-      RetentionInDays: 30
+  # ECSLogGroup:
+  #   Type: AWS::Logs::LogGroup
+  #   Properties:
+  #     LogGroupName: /ecs/bem13-lab2-app
+  #     RetentionInDays: 30
 
   # ============================================================
   # ECS Task Definition + Service
   # ============================================================
 
-  # Placeholder task definition using public nginx until the first
-  # CI deployment pushes the real image via CodeDeploy.
-  # No container health check here so ECS reaches steady state immediately.
-  # The real taskdef.json (in the app repo) adds the health check.
-  ECSTaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    Properties:
-      Family: bem13-lab2-app
-      Cpu: '256'
-      Memory: '512'
-      NetworkMode: awsvpc
-      RequiresCompatibilities:
-        - FARGATE
-      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
-      TaskRoleArn: !GetAtt ECSTaskRole.Arn
-      ContainerDefinitions:
-        - Name: bem13-lab2-app
-          Image: public.ecr.aws/nginx/nginx:stable-alpine3
-          Essential: true
-          PortMappings:
-            - ContainerPort: 8080
-              Protocol: tcp
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group: /ecs/bem13-lab2-app
-              awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: ecs
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # ECSTaskDefinition:
+  #   Type: AWS::ECS::TaskDefinition
+  #   Properties:
+  #     Family: bem13-lab2-app
+  #     Cpu: '256'
+  #     Memory: '512'
+  #     NetworkMode: awsvpc
+  #     RequiresCompatibilities:
+  #       - FARGATE
+  #     ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+  #     TaskRoleArn: !GetAtt ECSTaskRole.Arn
+  #     ContainerDefinitions:
+  #       - Name: bem13-lab2-app
+  #         Image: public.ecr.aws/nginx/nginx:stable-alpine3
+  #         Essential: true
+  #         PortMappings:
+  #           - ContainerPort: 8080
+  #             Protocol: tcp
+  #         LogConfiguration:
+  #           LogDriver: awslogs
+  #           Options:
+  #             awslogs-group: /ecs/bem13-lab2-app
+  #             awslogs-region: !Ref AWS::Region
+  #             awslogs-stream-prefix: ecs
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  ECSService:
-    Type: AWS::ECS::Service
-    DependsOn:
-      - ProductionListener
-      - TestListener
-      - ECSLogGroup
-    Properties:
-      ServiceName: bem13-lab2-svc
-      Cluster: !Ref ECSCluster
-      TaskDefinition: !Ref ECSTaskDefinition
-      DesiredCount: 1
-      LaunchType: FARGATE
-      NetworkConfiguration:
-        AwsvpcConfiguration:
-          Subnets:
-            - !Ref PrivateSubnet1a
-            - !Ref PrivateSubnet1b
-          SecurityGroups:
-            - !Ref ECSSecurityGroup
-          AssignPublicIp: DISABLED
-      DeploymentController:
-        Type: CODE_DEPLOY
-      LoadBalancers:
-        - ContainerName: bem13-lab2-app
-          ContainerPort: 8080
-          TargetGroupArn: !Ref BlueTargetGroup
-      HealthCheckGracePeriodSeconds: 60
-      EnableECSManagedTags: true
-      PropagateTags: SERVICE
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
-        - Key: Environment
-          Value: !Ref Environment
+  # ECSService:
+  #   Type: AWS::ECS::Service
+  #   DependsOn:
+  #     - ProductionListener
+  #     - TestListener
+  #     - ECSLogGroup
+  #   Properties:
+  #     ServiceName: bem13-lab2-svc
+  #     Cluster: !Ref ECSCluster
+  #     TaskDefinition: !Ref ECSTaskDefinition
+  #     DesiredCount: 1
+  #     LaunchType: FARGATE
+  #     NetworkConfiguration:
+  #       AwsvpcConfiguration:
+  #         Subnets:
+  #           - !Ref PrivateSubnet1a
+  #           - !Ref PrivateSubnet1b
+  #         SecurityGroups:
+  #           - !Ref ECSSecurityGroup
+  #         AssignPublicIp: DISABLED
+  #     DeploymentController:
+  #       Type: CODE_DEPLOY
+  #     LoadBalancers:
+  #       - ContainerName: bem13-lab2-app
+  #         ContainerPort: 8080
+  #         TargetGroupArn: !Ref BlueTargetGroup
+  #     HealthCheckGracePeriodSeconds: 60
+  #     EnableECSManagedTags: true
+  #     PropagateTags: SERVICE
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
+  #       - Key: Environment
+  #         Value: !Ref Environment
 
   # ============================================================
   # CodeDeploy
   # ============================================================
 
-  CodeDeployApplication:
-    Type: AWS::CodeDeploy::Application
-    Properties:
-      ApplicationName: bem13-lab2-app
-      ComputePlatform: ECS
+  # CodeDeployApplication:
+  #   Type: AWS::CodeDeploy::Application
+  #   Properties:
+  #     ApplicationName: bem13-lab2-app
+  #     ComputePlatform: ECS
 
-  CodeDeployDeploymentGroup:
-    Type: AWS::CodeDeploy::DeploymentGroup
-    DependsOn: ECSService
-    Properties:
-      ApplicationName: !Ref CodeDeployApplication
-      DeploymentGroupName: bem13-lab2-dg
-      ServiceRoleArn: !GetAtt CodeDeployRole.Arn
-      DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
-      DeploymentStyle:
-        DeploymentType: BLUE_GREEN
-        DeploymentOption: WITH_TRAFFIC_CONTROL
-      BlueGreenDeploymentConfiguration:
-        TerminateBlueInstancesOnDeploymentSuccess:
-          Action: TERMINATE
-          TerminationWaitTimeInMinutes: 5
-        DeploymentReadyOption:
-          ActionOnTimeout: CONTINUE_DEPLOYMENT
-          WaitTimeInMinutes: 0
-      ECSServices:
-        - ClusterName: !Ref ECSCluster
-          ServiceName: !GetAtt ECSService.Name
-      LoadBalancerInfo:
-        TargetGroupPairInfoList:
-          - ProdTrafficRoute:
-              ListenerArns:
-                - !Ref ProductionListener
-            TestTrafficRoute:
-              ListenerArns:
-                - !Ref TestListener
-            TargetGroups:
-              - Name: !GetAtt BlueTargetGroup.TargetGroupName
-              - Name: !GetAtt GreenTargetGroup.TargetGroupName
+  # CodeDeployDeploymentGroup:
+  #   Type: AWS::CodeDeploy::DeploymentGroup
+  #   DependsOn: ECSService
+  #   Properties:
+  #     ApplicationName: !Ref CodeDeployApplication
+  #     DeploymentGroupName: bem13-lab2-dg
+  #     ServiceRoleArn: !GetAtt CodeDeployRole.Arn
+  #     DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
+  #     DeploymentStyle:
+  #       DeploymentType: BLUE_GREEN
+  #       DeploymentOption: WITH_TRAFFIC_CONTROL
+  #     BlueGreenDeploymentConfiguration:
+  #       TerminateBlueInstancesOnDeploymentSuccess:
+  #         Action: TERMINATE
+  #         TerminationWaitTimeInMinutes: 5
+  #       DeploymentReadyOption:
+  #         ActionOnTimeout: CONTINUE_DEPLOYMENT
+  #         WaitTimeInMinutes: 0
+  #     ECSServices:
+  #       - ClusterName: !Ref ECSCluster
+  #         ServiceName: !GetAtt ECSService.Name
+  #     LoadBalancerInfo:
+  #       TargetGroupPairInfoList:
+  #         - ProdTrafficRoute:
+  #             ListenerArns:
+  #               - !Ref ProductionListener
+  #           TestTrafficRoute:
+  #             ListenerArns:
+  #               - !Ref TestListener
+  #           TargetGroups:
+  #             - Name: !GetAtt BlueTargetGroup.TargetGroupName
+  #             - Name: !GetAtt GreenTargetGroup.TargetGroupName
 
   # ============================================================
   # Auto Scaling
   # ============================================================
 
-  AutoScalingTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ECSService
-    Properties:
-      MinCapacity: 1
-      MaxCapacity: 4
-      ResourceId: !Sub service/${ECSCluster}/${ECSService.Name}
-      ScalableDimension: ecs:service:DesiredCount
-      ServiceNamespace: ecs
+  # AutoScalingTarget:
+  #   Type: AWS::ApplicationAutoScaling::ScalableTarget
+  #   DependsOn: ECSService
+  #   Properties:
+  #     MinCapacity: 1
+  #     MaxCapacity: 4
+  #     ResourceId: !Sub service/${ECSCluster}/${ECSService.Name}
+  #     ScalableDimension: ecs:service:DesiredCount
+  #     ServiceNamespace: ecs
 
-  ScaleOutPolicy:
-    Type: AWS::ApplicationAutoScaling::ScalingPolicy
-    Properties:
-      PolicyName: bem13-lab2-scale-out
-      PolicyType: StepScaling
-      ScalingTargetId: !Ref AutoScalingTarget
-      StepScalingPolicyConfiguration:
-        AdjustmentType: ChangeInCapacity
-        Cooldown: 60
-        MetricAggregationType: Average
-        StepAdjustments:
-          - MetricIntervalLowerBound: 0
-            ScalingAdjustment: 1
+  # ScaleOutPolicy:
+  #   Type: AWS::ApplicationAutoScaling::ScalingPolicy
+  #   Properties:
+  #     PolicyName: bem13-lab2-scale-out
+  #     PolicyType: StepScaling
+  #     ScalingTargetId: !Ref AutoScalingTarget
+  #     StepScalingPolicyConfiguration:
+  #       AdjustmentType: ChangeInCapacity
+  #       Cooldown: 60
+  #       MetricAggregationType: Average
+  #       StepAdjustments:
+  #         - MetricIntervalLowerBound: 0
+  #           ScalingAdjustment: 1
 
-  ScaleInPolicy:
-    Type: AWS::ApplicationAutoScaling::ScalingPolicy
-    Properties:
-      PolicyName: bem13-lab2-scale-in
-      PolicyType: StepScaling
-      ScalingTargetId: !Ref AutoScalingTarget
-      StepScalingPolicyConfiguration:
-        AdjustmentType: ChangeInCapacity
-        Cooldown: 300
-        MetricAggregationType: Average
-        StepAdjustments:
-          - MetricIntervalUpperBound: 0
-            ScalingAdjustment: -1
+  # ScaleInPolicy:
+  #   Type: AWS::ApplicationAutoScaling::ScalingPolicy
+  #   Properties:
+  #     PolicyName: bem13-lab2-scale-in
+  #     PolicyType: StepScaling
+  #     ScalingTargetId: !Ref AutoScalingTarget
+  #     StepScalingPolicyConfiguration:
+  #       AdjustmentType: ChangeInCapacity
+  #       Cooldown: 300
+  #       MetricAggregationType: Average
+  #       StepAdjustments:
+  #         - MetricIntervalUpperBound: 0
+  #           ScalingAdjustment: -1
 
-  CPUHighAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: bem13-lab2-cpu-high
-      AlarmDescription: Scale out when ECS CPU >= 70%
-      MetricName: CPUUtilization
-      Namespace: AWS/ECS
-      Dimensions:
-        - Name: ClusterName
-          Value: !Ref ECSCluster
-        - Name: ServiceName
-          Value: !GetAtt ECSService.Name
-      Statistic: Average
-      Period: 60
-      EvaluationPeriods: 2
-      Threshold: 70
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      AlarmActions:
-        - !Ref ScaleOutPolicy
-      TreatMissingData: notBreaching
+  # CPUHighAlarm:
+  #   Type: AWS::CloudWatch::Alarm
+  #   Properties:
+  #     AlarmName: bem13-lab2-cpu-high
+  #     AlarmDescription: Scale out when ECS CPU >= 70%
+  #     MetricName: CPUUtilization
+  #     Namespace: AWS/ECS
+  #     Dimensions:
+  #       - Name: ClusterName
+  #         Value: !Ref ECSCluster
+  #       - Name: ServiceName
+  #         Value: !GetAtt ECSService.Name
+  #     Statistic: Average
+  #     Period: 60
+  #     EvaluationPeriods: 2
+  #     Threshold: 70
+  #     ComparisonOperator: GreaterThanOrEqualToThreshold
+  #     AlarmActions:
+  #       - !Ref ScaleOutPolicy
+  #     TreatMissingData: notBreaching
 
-  CPULowAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: bem13-lab2-cpu-low
-      AlarmDescription: Scale in when ECS CPU <= 30%
-      MetricName: CPUUtilization
-      Namespace: AWS/ECS
-      Dimensions:
-        - Name: ClusterName
-          Value: !Ref ECSCluster
-        - Name: ServiceName
-          Value: !GetAtt ECSService.Name
-      Statistic: Average
-      Period: 60
-      EvaluationPeriods: 5
-      Threshold: 30
-      ComparisonOperator: LessThanOrEqualToThreshold
-      AlarmActions:
-        - !Ref ScaleInPolicy
-      TreatMissingData: notBreaching
+  # CPULowAlarm:
+  #   Type: AWS::CloudWatch::Alarm
+  #   Properties:
+  #     AlarmName: bem13-lab2-cpu-low
+  #     AlarmDescription: Scale in when ECS CPU <= 30%
+  #     MetricName: CPUUtilization
+  #     Namespace: AWS/ECS
+  #     Dimensions:
+  #       - Name: ClusterName
+  #         Value: !Ref ECSCluster
+  #       - Name: ServiceName
+  #         Value: !GetAtt ECSService.Name
+  #     Statistic: Average
+  #     Period: 60
+  #     EvaluationPeriods: 5
+  #     Threshold: 30
+  #     ComparisonOperator: LessThanOrEqualToThreshold
+  #     AlarmActions:
+  #       - !Ref ScaleInPolicy
+  #     TreatMissingData: notBreaching
 
   # ============================================================
   # Pipeline Infrastructure
   # ============================================================
 
-  ArtifactBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub bem13-lab2-pipeline-artifacts-${AWS::AccountId}
-      VersioningConfiguration:
-        Status: Enabled
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpireOldArtifacts
-            Status: Enabled
-            ExpirationInDays: 30
-      Tags:
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
+  # ArtifactBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Sub bem13-lab2-pipeline-artifacts-${AWS::AccountId}
+  #     VersioningConfiguration:
+  #       Status: Enabled
+  #     BucketEncryption:
+  #       ServerSideEncryptionConfiguration:
+  #         - ServerSideEncryptionByDefault:
+  #             SSEAlgorithm: AES256
+  #     PublicAccessBlockConfiguration:
+  #       BlockPublicAcls: true
+  #       BlockPublicPolicy: true
+  #       IgnorePublicAcls: true
+  #       RestrictPublicBuckets: true
+  #     LifecycleConfiguration:
+  #       Rules:
+  #         - Id: ExpireOldArtifacts
+  #           Status: Enabled
+  #           ExpirationInDays: 30
+  #     Tags:
+  #       - Key: Project
+  #         Value: bem13-lab2-ecs-cicd
 
-  CodePipeline:
-    Type: AWS::CodePipeline::Pipeline
-    DependsOn: CodeDeployDeploymentGroup
-    Properties:
-      Name: bem13-lab2-pipeline
-      RoleArn: !GetAtt CodePipelineRole.Arn
-      ArtifactStore:
-        Type: S3
-        Location: !Ref ArtifactBucket
-      Stages:
-        - Name: Source
-          Actions:
-            - Name: ECR-Source
-              ActionTypeId:
-                Category: Source
-                Owner: AWS
-                Provider: ECR
-                Version: '1'
-              Configuration:
-                RepositoryName: bem13-lab2-app
-                ImageTag: latest
-              OutputArtifacts:
-                - Name: ImageArtifact
-              RunOrder: 1
-            - Name: S3-Deploy-Config
-              ActionTypeId:
-                Category: Source
-                Owner: AWS
-                Provider: S3
-                Version: '1'
-              Configuration:
-                S3Bucket: !Ref ArtifactBucket
-                S3ObjectKey: deploy/deploy-bundle.zip
-                PollForSourceChanges: 'false'
-              OutputArtifacts:
-                - Name: DeployArtifact
-              RunOrder: 1
-        - Name: Deploy
-          Actions:
-            - Name: BlueGreenDeploy
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Provider: CodeDeployToECS
-                Version: '1'
-              Configuration:
-                ApplicationName: !Ref CodeDeployApplication
-                DeploymentGroupName: !Ref CodeDeployDeploymentGroup
-                TaskDefinitionTemplateArtifact: DeployArtifact
-                TaskDefinitionTemplatePath: taskdef.json
-                AppSpecTemplateArtifact: DeployArtifact
-                AppSpecTemplatePath: appspec.yaml
-                Image1ArtifactName: ImageArtifact
-                Image1ContainerName: IMAGE1_NAME
-              InputArtifacts:
-                - Name: ImageArtifact
-                - Name: DeployArtifact
-              RunOrder: 1
+  # CodePipeline:
+  #   Type: AWS::CodePipeline::Pipeline
+  #   DependsOn: CodeDeployDeploymentGroup
+  #   Properties:
+  #     Name: bem13-lab2-pipeline
+  #     RoleArn: !GetAtt CodePipelineRole.Arn
+  #     ArtifactStore:
+  #       Type: S3
+  #       Location: !Ref ArtifactBucket
+  #     Stages:
+  #       - Name: Source
+  #         Actions:
+  #           - Name: ECR-Source
+  #             ActionTypeId:
+  #               Category: Source
+  #               Owner: AWS
+  #               Provider: ECR
+  #               Version: '1'
+  #             Configuration:
+  #               RepositoryName: bem13-lab2-app
+  #               ImageTag: latest
+  #             OutputArtifacts:
+  #               - Name: ImageArtifact
+  #             RunOrder: 1
+  #           - Name: S3-Deploy-Config
+  #             ActionTypeId:
+  #               Category: Source
+  #               Owner: AWS
+  #               Provider: S3
+  #               Version: '1'
+  #             Configuration:
+  #               S3Bucket: !Ref ArtifactBucket
+  #               S3ObjectKey: deploy/deploy-bundle.zip
+  #               PollForSourceChanges: 'false'
+  #             OutputArtifacts:
+  #               - Name: DeployArtifact
+  #             RunOrder: 1
+  #       - Name: Deploy
+  #         Actions:
+  #           - Name: BlueGreenDeploy
+  #             ActionTypeId:
+  #               Category: Deploy
+  #               Owner: AWS
+  #               Provider: CodeDeployToECS
+  #               Version: '1'
+  #             Configuration:
+  #               ApplicationName: !Ref CodeDeployApplication
+  #               DeploymentGroupName: !Ref CodeDeployDeploymentGroup
+  #               TaskDefinitionTemplateArtifact: DeployArtifact
+  #               TaskDefinitionTemplatePath: taskdef.json
+  #               AppSpecTemplateArtifact: DeployArtifact
+  #               AppSpecTemplatePath: appspec.yaml
+  #               Image1ArtifactName: ImageArtifact
+  #               Image1ContainerName: IMAGE1_NAME
+  #             InputArtifacts:
+  #               - Name: ImageArtifact
+  #               - Name: DeployArtifact
+  #             RunOrder: 1
 
-  # Triggers the pipeline whenever a new image is pushed to ECR
-  ECRPushEventRule:
-    Type: AWS::Events::Rule
-    DependsOn: CodePipeline
-    Properties:
-      Name: bem13-ecr-image-push
-      Description: Trigger CodePipeline on successful ECR image push
-      EventPattern:
-        source:
-          - aws.ecr
-        detail-type:
-          - ECR Image Action
-        detail:
-          action-type:
-            - PUSH
-          result:
-            - SUCCESS
-          repository-name:
-            - bem13-lab2-app
-      Targets:
-        - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
-          Id: TriggerCodePipeline
-          RoleArn: !GetAtt EventBridgePipelineRole.Arn
+  # # Triggers the pipeline whenever a new image is pushed to ECR
+  # ECRPushEventRule:
+  #   Type: AWS::Events::Rule
+  #   DependsOn: CodePipeline
+  #   Properties:
+  #     Name: bem13-ecr-image-push
+  #     Description: Trigger CodePipeline on successful ECR image push
+  #     EventPattern:
+  #       source:
+  #         - aws.ecr
+  #       detail-type:
+  #         - ECR Image Action
+  #       detail:
+  #         action-type:
+  #           - PUSH
+  #         result:
+  #           - SUCCESS
+  #         repository-name:
+  #           - bem13-lab2-app
+  #     Targets:
+  #       - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
+  #         Id: TriggerCodePipeline
+  #         RoleArn: !GetAtt EventBridgePipelineRole.Arn
 
-Outputs:
-  ALBDNSName:
-    Description: Application Load Balancer DNS name
-    Value: !GetAtt ApplicationLoadBalancer.DNSName
-    Export:
-      Name: bem13-lab2-alb-dns
+# Outputs:
+#   ALBDNSName:
+#     Description: Application Load Balancer DNS name
+#     Value: !GetAtt ApplicationLoadBalancer.DNSName
+#     Export:
+#       Name: bem13-lab2-alb-dns
 
-  ECRRepositoryURI:
-    Description: ECR repository URI for pushing images
-    Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/bem13-lab2-app
-    Export:
-      Name: bem13-lab2-ecr-uri
+#   ECRRepositoryURI:
+#     Description: ECR repository URI for pushing images
+#     Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/bem13-lab2-app
+#     Export:
+#       Name: bem13-lab2-ecr-uri
 
-  GitHubActionsRoleArn:
-    Description: IAM role ARN for GitHub Actions OIDC authentication
-    Value: !GetAtt GitHubActionsOIDCRole.Arn
-    Export:
-      Name: bem13-lab2-github-oidc-role-arn
+#   GitHubActionsRoleArn:
+#     Description: IAM role ARN for GitHub Actions OIDC authentication
+#     Value: !GetAtt GitHubActionsOIDCRole.Arn
+#     Export:
+#       Name: bem13-lab2-github-oidc-role-arn
 
-  ArtifactBucketName:
-    Description: S3 bucket for CodePipeline artifacts and deploy bundle
-    Value: !Ref ArtifactBucket
-    Export:
-      Name: bem13-lab2-artifact-bucket
+#   ArtifactBucketName:
+#     Description: S3 bucket for CodePipeline artifacts and deploy bundle
+#     Value: !Ref ArtifactBucket
+#     Export:
+#       Name: bem13-lab2-artifact-bucket
 
-  ECSClusterName:
-    Description: ECS cluster name
-    Value: !Ref ECSCluster
-    Export:
-      Name: bem13-lab2-cluster-name
+#   ECSClusterName:
+#     Description: ECS cluster name
+#     Value: !Ref ECSCluster
+#     Export:
+#       Name: bem13-lab2-cluster-name
