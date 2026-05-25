@@ -22,25 +22,25 @@ Resources:
   # ECR Repository
   # ============================================================
 
-  # ECRRepository:
-  #   Type: AWS::ECR::Repository
-  #   Properties:
-  #     RepositoryName: bem13-lab2-app
-  #     ImageScanningConfiguration:
-  #       ScanOnPush: true
-  #     ImageTagMutability: MUTABLE
-  #     LifecyclePolicy:
-  #       LifecyclePolicyText: >
-  #         {"rules":[{"rulePriority":1,"description":"Keep last 10 images",
-  #         "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":10},
-  #         "action":{"type":"expire"}}]}
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
-  #       - Key: Environment
-  #         Value: !Ref Environment
-  #       - Key: ManagedBy
-  #         Value: CloudFormation
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: bem13-lab2-app
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: >
+          {"rules":[{"rulePriority":1,"description":"Keep last 10 images",
+          "selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":10},
+          "action":{"type":"expire"}}]}
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
 
   # ============================================================
   # VPC

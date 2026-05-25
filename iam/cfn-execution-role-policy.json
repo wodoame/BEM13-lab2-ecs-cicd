@@ -39,6 +39,23 @@
             "Resource": "*"
         },
         {
+            "Sid": "ECRRepository",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:CreateRepository",
+                "ecr:DeleteRepository",
+                "ecr:DescribeRepositories",
+                "ecr:PutImageScanningConfiguration",
+                "ecr:PutImageTagMutability",
+                "ecr:PutLifecyclePolicy",
+                "ecr:DeleteLifecyclePolicy",
+                "ecr:TagResource",
+                "ecr:UntagResource",
+                "ecr:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
             "Sid": "IAMOIDCProvider",
             "Effect": "Allow",
             "Action": [
