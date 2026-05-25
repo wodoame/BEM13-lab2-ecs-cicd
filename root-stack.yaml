@@ -729,68 +729,68 @@ Resources:
   # ECS Task Definition + Service
   # ============================================================
 
-  # ECSTaskDefinition:
-  #   Type: AWS::ECS::TaskDefinition
-  #   Properties:
-  #     Family: bem13-lab2-app
-  #     Cpu: '256'
-  #     Memory: '512'
-  #     NetworkMode: awsvpc
-  #     RequiresCompatibilities:
-  #       - FARGATE
-  #     ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
-  #     TaskRoleArn: !GetAtt ECSTaskRole.Arn
-  #     ContainerDefinitions:
-  #       - Name: bem13-lab2-app
-  #         Image: public.ecr.aws/nginx/nginx:stable-alpine3
-  #         Essential: true
-  #         PortMappings:
-  #           - ContainerPort: 8080
-  #             Protocol: tcp
-  #         LogConfiguration:
-  #           LogDriver: awslogs
-  #           Options:
-  #             awslogs-group: /ecs/bem13-lab2-app
-  #             awslogs-region: !Ref AWS::Region
-  #             awslogs-stream-prefix: ecs
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: bem13-lab2-app
+      Cpu: '256'
+      Memory: '512'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: bem13-lab2-app
+          Image: public.ecr.aws/nginx/nginx:stable-alpine3
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/bem13-lab2-app
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
-  # ECSService:
-  #   Type: AWS::ECS::Service
-  #   DependsOn:
-  #     - ProductionListener
-  #     - TestListener
-  #     - ECSLogGroup
-  #   Properties:
-  #     ServiceName: bem13-lab2-svc
-  #     Cluster: !Ref ECSCluster
-  #     TaskDefinition: !Ref ECSTaskDefinition
-  #     DesiredCount: 1
-  #     LaunchType: FARGATE
-  #     NetworkConfiguration:
-  #       AwsvpcConfiguration:
-  #         Subnets:
-  #           - !Ref PrivateSubnet1a
-  #           - !Ref PrivateSubnet1b
-  #         SecurityGroups:
-  #           - !Ref ECSSecurityGroup
-  #         AssignPublicIp: DISABLED
-  #     DeploymentController:
-  #       Type: CODE_DEPLOY
-  #     LoadBalancers:
-  #       - ContainerName: bem13-lab2-app
-  #         ContainerPort: 8080
-  #         TargetGroupArn: !Ref BlueTargetGroup
-  #     HealthCheckGracePeriodSeconds: 60
-  #     EnableECSManagedTags: true
-  #     PropagateTags: SERVICE
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
-  #       - Key: Environment
-  #         Value: !Ref Environment
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn:
+      - ProductionListener
+      - TestListener
+      - ECSLogGroup
+    Properties:
+      ServiceName: bem13-lab2-svc
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref ECSTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PrivateSubnet1a
+            - !Ref PrivateSubnet1b
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+          AssignPublicIp: DISABLED
+      DeploymentController:
+        Type: CODE_DEPLOY
+      LoadBalancers:
+        - ContainerName: bem13-lab2-app
+          ContainerPort: 8080
+          TargetGroupArn: !Ref BlueTargetGroup
+      HealthCheckGracePeriodSeconds: 60
+      EnableECSManagedTags: true
+      PropagateTags: SERVICE
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
+        - Key: Environment
+          Value: !Ref Environment
 
   # ============================================================
   # CodeDeploy
@@ -1055,8 +1055,8 @@ Outputs:
 #     Export:
 #       Name: bem13-lab2-artifact-bucket
 
-#   ECSClusterName:
-#     Description: ECS cluster name
-#     Value: !Ref ECSCluster
-#     Export:
-#       Name: bem13-lab2-cluster-name
+  ECSClusterName:
+    Description: ECS cluster name
+    Value: !Ref ECSCluster
+    Export:
+      Name: bem13-lab2-cluster-name

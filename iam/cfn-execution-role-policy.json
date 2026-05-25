@@ -118,6 +118,26 @@
             "Resource": "*"
         },
         {
+            "Sid": "ECSTasksAndServices",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:RegisterTaskDefinition",
+                "ecs:DeregisterTaskDefinition",
+                "ecs:DescribeTaskDefinition",
+                "ecs:CreateService",
+                "ecs:DeleteService",
+                "ecs:DescribeServices",
+                "ecs:UpdateService"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "IAMPassRole",
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "*"
+        },
+        {
             "Sid": "ECSCluster",
             "Effect": "Allow",
             "Action": [
