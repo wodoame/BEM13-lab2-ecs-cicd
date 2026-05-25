@@ -118,6 +118,22 @@
             "Resource": "*"
         },
         {
+            "Sid": "CodeDeploy",
+            "Effect": "Allow",
+            "Action": [
+                "codedeploy:CreateApplication",
+                "codedeploy:DeleteApplication",
+                "codedeploy:GetApplication",
+                "codedeploy:CreateDeploymentGroup",
+                "codedeploy:DeleteDeploymentGroup",
+                "codedeploy:GetDeploymentGroup",
+                "codedeploy:UpdateDeploymentGroup",
+                "codedeploy:TagResource",
+                "codedeploy:UntagResource"
+            ],
+            "Resource": "*"
+        },
+        {
             "Sid": "ECSTasksAndServices",
             "Effect": "Allow",
             "Action": [

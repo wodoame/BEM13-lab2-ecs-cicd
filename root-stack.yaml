@@ -796,44 +796,44 @@ Resources:
   # CodeDeploy
   # ============================================================
 
-  # CodeDeployApplication:
-  #   Type: AWS::CodeDeploy::Application
-  #   Properties:
-  #     ApplicationName: bem13-lab2-app
-  #     ComputePlatform: ECS
+  CodeDeployApplication:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: bem13-lab2-app
+      ComputePlatform: ECS
 
-  # CodeDeployDeploymentGroup:
-  #   Type: AWS::CodeDeploy::DeploymentGroup
-  #   DependsOn: ECSService
-  #   Properties:
-  #     ApplicationName: !Ref CodeDeployApplication
-  #     DeploymentGroupName: bem13-lab2-dg
-  #     ServiceRoleArn: !GetAtt CodeDeployRole.Arn
-  #     DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
-  #     DeploymentStyle:
-  #       DeploymentType: BLUE_GREEN
-  #       DeploymentOption: WITH_TRAFFIC_CONTROL
-  #     BlueGreenDeploymentConfiguration:
-  #       TerminateBlueInstancesOnDeploymentSuccess:
-  #         Action: TERMINATE
-  #         TerminationWaitTimeInMinutes: 5
-  #       DeploymentReadyOption:
-  #         ActionOnTimeout: CONTINUE_DEPLOYMENT
-  #         WaitTimeInMinutes: 0
-  #     ECSServices:
-  #       - ClusterName: !Ref ECSCluster
-  #         ServiceName: !GetAtt ECSService.Name
-  #     LoadBalancerInfo:
-  #       TargetGroupPairInfoList:
-  #         - ProdTrafficRoute:
-  #             ListenerArns:
-  #               - !Ref ProductionListener
-  #           TestTrafficRoute:
-  #             ListenerArns:
-  #               - !Ref TestListener
-  #           TargetGroups:
-  #             - Name: !GetAtt BlueTargetGroup.TargetGroupName
-  #             - Name: !GetAtt GreenTargetGroup.TargetGroupName
+  CodeDeployDeploymentGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    DependsOn: ECSService
+    Properties:
+      ApplicationName: !Ref CodeDeployApplication
+      DeploymentGroupName: bem13-lab2-dg
+      ServiceRoleArn: !GetAtt CodeDeployRole.Arn
+      DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
+      DeploymentStyle:
+        DeploymentType: BLUE_GREEN
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+      BlueGreenDeploymentConfiguration:
+        TerminateBlueInstancesOnDeploymentSuccess:
+          Action: TERMINATE
+          TerminationWaitTimeInMinutes: 5
+        DeploymentReadyOption:
+          ActionOnTimeout: CONTINUE_DEPLOYMENT
+          WaitTimeInMinutes: 0
+      ECSServices:
+        - ClusterName: !Ref ECSCluster
+          ServiceName: !GetAtt ECSService.Name
+      LoadBalancerInfo:
+        TargetGroupPairInfoList:
+          - ProdTrafficRoute:
+              ListenerArns:
+                - !Ref ProductionListener
+            TestTrafficRoute:
+              ListenerArns:
+                - !Ref TestListener
+            TargetGroups:
+              - Name: !GetAtt BlueTargetGroup.TargetGroupName
+              - Name: !GetAtt GreenTargetGroup.TargetGroupName
 
   # ============================================================
   # Auto Scaling
