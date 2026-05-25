@@ -1,6 +1,5 @@
 {
     "Version": "2012-10-17",
-    "Comment": "Least-privilege policy for the CloudFormation stack execution role. Covers the resources currently active in root-stack.yaml: VPC, subnets, IGW, NAT Gateways, route tables, and the GitHub OIDC provider. Expand this policy as more resources are uncommented in the template.",
     "Statement": [
         {
             "Sid": "EC2Networking",
