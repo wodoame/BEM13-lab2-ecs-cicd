@@ -423,76 +423,76 @@ Resources:
   # Application Load Balancer
   # ============================================================
 
-  # ApplicationLoadBalancer:
-  #   Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-  #   Properties:
-  #     Name: bem13-lab2-alb
-  #     Scheme: internet-facing
-  #     Type: application
-  #     Subnets:
-  #       - !Ref PublicSubnet1a
-  #       - !Ref PublicSubnet1b
-  #     SecurityGroups:
-  #       - !Ref ALBSecurityGroup
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
-  #       - Key: Environment
-  #         Value: !Ref Environment
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: bem13-lab2-alb
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref PublicSubnet1a
+        - !Ref PublicSubnet1b
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
+        - Key: Environment
+          Value: !Ref Environment
 
-  # BlueTargetGroup:
-  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  #   Properties:
-  #     Name: bem13-blue-tg
-  #     Port: 8080
-  #     Protocol: HTTP
-  #     VpcId: !Ref VPC
-  #     TargetType: ip
-  #     HealthCheckPath: /health
-  #     HealthCheckIntervalSeconds: 30
-  #     HealthCheckTimeoutSeconds: 5
-  #     HealthyThresholdCount: 2
-  #     UnhealthyThresholdCount: 3
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  BlueTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: bem13-blue-tg
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
-  # GreenTargetGroup:
-  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  #   Properties:
-  #     Name: bem13-green-tg
-  #     Port: 8080
-  #     Protocol: HTTP
-  #     VpcId: !Ref VPC
-  #     TargetType: ip
-  #     HealthCheckPath: /health
-  #     HealthCheckIntervalSeconds: 30
-  #     HealthCheckTimeoutSeconds: 5
-  #     HealthyThresholdCount: 2
-  #     UnhealthyThresholdCount: 3
-  #     Tags:
-  #       - Key: Project
-  #         Value: bem13-lab2-ecs-cicd
+  GreenTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: bem13-green-tg
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
 
-  # ProductionListener:
-  #   Type: AWS::ElasticLoadBalancingV2::Listener
-  #   Properties:
-  #     LoadBalancerArn: !Ref ApplicationLoadBalancer
-  #     Port: 80
-  #     Protocol: HTTP
-  #     DefaultActions:
-  #       - Type: forward
-  #         TargetGroupArn: !Ref BlueTargetGroup
+  ProductionListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref BlueTargetGroup
 
-  # TestListener:
-  #   Type: AWS::ElasticLoadBalancingV2::Listener
-  #   Properties:
-  #     LoadBalancerArn: !Ref ApplicationLoadBalancer
-  #     Port: 8080
-  #     Protocol: HTTP
-  #     DefaultActions:
-  #       - Type: forward
-  #         TargetGroupArn: !Ref GreenTargetGroup
+  TestListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 8080
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref GreenTargetGroup
 
   # ============================================================
   # IAM - GitHub OIDC (GitSync setup)
@@ -1037,11 +1037,11 @@ Outputs:
     Export:
       Name: bem13-lab2-github-oidc-role-arn
 
-#   ALBDNSName:
-#     Description: Application Load Balancer DNS name
-#     Value: !GetAtt ApplicationLoadBalancer.DNSName
-#     Export:
-#       Name: bem13-lab2-alb-dns
+  ALBDNSName:
+    Description: Application Load Balancer DNS name
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: bem13-lab2-alb-dns
 
 #   ECRRepositoryURI:
 #     Description: ECR repository URI for pushing images
