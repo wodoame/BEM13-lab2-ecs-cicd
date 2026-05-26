@@ -498,12 +498,8 @@ Resources:
   # IAM - GitHub OIDC (GitSync setup)
   # ============================================================
 
-  # DeletionPolicy: Retain because only one OIDC provider per URL is
-  # allowed per account. If one already exists, this resource will fail.
-  # Check with: aws iam list-open-id-connect-providers
   GitHubOIDCProvider:
     Type: AWS::IAM::OIDCProvider
-    DeletionPolicy: Retain
     Properties:
       Url: https://token.actions.githubusercontent.com
       ClientIdList:
