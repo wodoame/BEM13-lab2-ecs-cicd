@@ -750,7 +750,7 @@ Resources:
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       ContainerDefinitions:
         - Name: bem13-lab2-app
-          Image: public.ecr.aws/nginx/nginx:stable-alpine
+          Image: 741448927703.dkr.ecr.us-east-1.amazonaws.com/bem13-lab2-app:latest
           Essential: true
           PortMappings:
             - ContainerPort: 8080
