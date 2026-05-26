@@ -102,7 +102,8 @@
                 "elasticloadbalancing:ModifyListener",
                 "elasticloadbalancing:AddTags",
                 "elasticloadbalancing:RemoveTags",
-                "elasticloadbalancing:DescribeTags"
+                "elasticloadbalancing:DescribeTags",
+                "elasticloadbalancing:DescribeTargetHealth"
             ],
             "Resource": "*"
         },
