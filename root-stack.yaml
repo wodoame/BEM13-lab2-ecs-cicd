@@ -750,7 +750,7 @@ Resources:
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       ContainerDefinitions:
         - Name: bem13-lab2-app
-          Image: 741448927703.dkr.ecr.us-east-1.amazonaws.com/bem13-lab2-app:latest
+          Image: 741448927703.dkr.ecr.us-east-1.amazonaws.com/bem13-lab2-bootstrap:latest
           Essential: true
           PortMappings:
             - ContainerPort: 8080
