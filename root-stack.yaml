@@ -882,7 +882,7 @@ Resources:
         Cooldown: 300
         MetricAggregationType: Average
         StepAdjustments:
-          - MetricIntervalUpperBound: 0
+          - MetricIntervalLowerBound: 0
             ScalingAdjustment: -1
 
   CPUHighAlarm:
