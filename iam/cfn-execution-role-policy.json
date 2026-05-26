@@ -21,6 +21,7 @@
                 "ec2:AllocateAddress",
                 "ec2:ReleaseAddress",
                 "ec2:DescribeAddresses",
+                "ec2:DescribeAddressesAttribute",
                 "ec2:CreateNatGateway",
                 "ec2:DeleteNatGateway",
                 "ec2:DescribeNatGateways",
@@ -33,6 +34,7 @@
                 "ec2:DisassociateRouteTable",
                 "ec2:CreateTags",
                 "ec2:DeleteTags",
+                "ec2:DescribeTags",
                 "ec2:DescribeAvailabilityZones"
             ],
             "Resource": "*"
@@ -48,6 +50,7 @@
                 "ecr:PutImageTagMutability",
                 "ecr:PutLifecyclePolicy",
                 "ecr:DeleteLifecyclePolicy",
+                "ecr:GetLifecyclePolicy",
                 "ecr:TagResource",
                 "ecr:UntagResource",
                 "ecr:ListTagsForResource"
@@ -61,6 +64,7 @@
                 "iam:CreateOpenIDConnectProvider",
                 "iam:DeleteOpenIDConnectProvider",
                 "iam:GetOpenIDConnectProvider",
+                "iam:ListOpenIDConnectProviders",
                 "iam:UpdateOpenIDConnectProviderThumbprint",
                 "iam:AddClientIDToOpenIDConnectProvider",
                 "iam:RemoveClientIDFromOpenIDConnectProvider",
@@ -91,19 +95,23 @@
                 "elasticloadbalancing:DeleteLoadBalancer",
                 "elasticloadbalancing:DescribeLoadBalancers",
                 "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                "elasticloadbalancing:DescribeLoadBalancerAttributes",
                 "elasticloadbalancing:CreateTargetGroup",
                 "elasticloadbalancing:DeleteTargetGroup",
                 "elasticloadbalancing:DescribeTargetGroups",
                 "elasticloadbalancing:ModifyTargetGroup",
                 "elasticloadbalancing:ModifyTargetGroupAttributes",
+                "elasticloadbalancing:DescribeTargetGroupAttributes",
+                "elasticloadbalancing:DescribeTargetHealth",
                 "elasticloadbalancing:CreateListener",
                 "elasticloadbalancing:DeleteListener",
                 "elasticloadbalancing:DescribeListeners",
+                "elasticloadbalancing:DescribeListenerAttributes",
                 "elasticloadbalancing:ModifyListener",
+                "elasticloadbalancing:DescribeRules",
                 "elasticloadbalancing:AddTags",
                 "elasticloadbalancing:RemoveTags",
-                "elasticloadbalancing:DescribeTags",
-                "elasticloadbalancing:DescribeTargetHealth"
+                "elasticloadbalancing:DescribeTags"
             ],
             "Resource": "*"
         },
@@ -114,6 +122,7 @@
                 "ec2:CreateVpcEndpoint",
                 "ec2:DeleteVpcEndpoints",
                 "ec2:DescribeVpcEndpoints",
+                "ec2:DescribeVpcEndpointServices",
                 "ec2:ModifyVpcEndpoint"
             ],
             "Resource": "*"
@@ -124,6 +133,8 @@
             "Action": [
                 "s3:CreateBucket",
                 "s3:DeleteBucket",
+                "s3:GetBucketLocation",
+                "s3:GetBucketAcl",
                 "s3:GetBucketPolicy",
                 "s3:PutBucketPolicy",
                 "s3:PutBucketVersioning",
@@ -135,7 +146,8 @@
                 "s3:PutBucketPublicAccessBlock",
                 "s3:GetBucketPublicAccessBlock",
                 "s3:PutBucketTagging",
-                "s3:GetBucketTagging"
+                "s3:GetBucketTagging",
+                "s3:GetBucketLogging"
             ],
             "Resource": "*"
         },
@@ -147,8 +159,10 @@
                 "codepipeline:DeletePipeline",
                 "codepipeline:GetPipeline",
                 "codepipeline:UpdatePipeline",
+                "codepipeline:GetPipelineState",
                 "codepipeline:TagResource",
-                "codepipeline:UntagResource"
+                "codepipeline:UntagResource",
+                "codepipeline:ListTagsForResource"
             ],
             "Resource": "*"
         },
@@ -161,8 +175,10 @@
                 "events:DescribeRule",
                 "events:PutTargets",
                 "events:RemoveTargets",
+                "events:ListTargetsByRule",
                 "events:TagResource",
-                "events:UntagResource"
+                "events:UntagResource",
+                "events:ListTagsForResource"
             ],
             "Resource": "*"
         },
@@ -175,7 +191,9 @@
                 "application-autoscaling:DescribeScalableTargets",
                 "application-autoscaling:PutScalingPolicy",
                 "application-autoscaling:DeleteScalingPolicy",
-                "application-autoscaling:DescribeScalingPolicies"
+                "application-autoscaling:DescribeScalingPolicies",
+                "application-autoscaling:DescribeScalingActivities",
+                "application-autoscaling:DescribeScheduledActions"
             ],
             "Resource": "*"
         },
@@ -187,7 +205,8 @@
                 "cloudwatch:DeleteAlarms",
                 "cloudwatch:DescribeAlarms",
                 "cloudwatch:EnableAlarmActions",
-                "cloudwatch:DisableAlarmActions"
+                "cloudwatch:DisableAlarmActions",
+                "cloudwatch:ListTagsForResource"
             ],
             "Resource": "*"
         },
@@ -198,9 +217,11 @@
                 "codedeploy:CreateApplication",
                 "codedeploy:DeleteApplication",
                 "codedeploy:GetApplication",
+                "codedeploy:BatchGetApplications",
                 "codedeploy:CreateDeploymentGroup",
                 "codedeploy:DeleteDeploymentGroup",
                 "codedeploy:GetDeploymentGroup",
+                "codedeploy:BatchGetDeploymentGroups",
                 "codedeploy:UpdateDeploymentGroup",
                 "codedeploy:TagResource",
                 "codedeploy:UntagResource"
@@ -214,10 +235,12 @@
                 "ecs:RegisterTaskDefinition",
                 "ecs:DeregisterTaskDefinition",
                 "ecs:DescribeTaskDefinition",
+                "ecs:ListTaskDefinitions",
                 "ecs:CreateService",
                 "ecs:DeleteService",
                 "ecs:DescribeServices",
-                "ecs:UpdateService"
+                "ecs:UpdateService",
+                "ecs:DescribeCapacityProviders"
             ],
             "Resource": "*"
         },
@@ -258,8 +281,11 @@
                 "logs:DeleteLogGroup",
                 "logs:DescribeLogGroups",
                 "logs:PutRetentionPolicy",
+                "logs:DeleteRetentionPolicy",
                 "logs:TagLogGroup",
-                "logs:TagResource"
+                "logs:TagResource",
+                "logs:ListTagsLogGroup",
+                "logs:ListTagsForResource"
             ],
             "Resource": "*"
         },
@@ -270,13 +296,18 @@
                 "iam:CreateRole",
                 "iam:DeleteRole",
                 "iam:GetRole",
+                "iam:UpdateRole",
+                "iam:UpdateAssumeRolePolicy",
                 "iam:PutRolePolicy",
                 "iam:DeleteRolePolicy",
                 "iam:GetRolePolicy",
+                "iam:ListRolePolicies",
                 "iam:TagRole",
                 "iam:UntagRole",
+                "iam:ListRoleTags",
                 "iam:AttachRolePolicy",
-                "iam:DetachRolePolicy"
+                "iam:DetachRolePolicy",
+                "iam:ListAttachedRolePolicies"
             ],
             "Resource": "*"
         }
