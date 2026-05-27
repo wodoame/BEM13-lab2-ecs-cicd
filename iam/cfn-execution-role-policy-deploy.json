@@ -1,0 +1,181 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "ECSTasksAndServices",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:RegisterTaskDefinition",
+                "ecs:DeregisterTaskDefinition",
+                "ecs:DescribeTaskDefinition",
+                "ecs:ListTaskDefinitions",
+                "ecs:CreateService",
+                "ecs:DeleteService",
+                "ecs:DescribeServices",
+                "ecs:UpdateService",
+                "ecs:DescribeCapacityProviders"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ECSCluster",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:CreateCluster",
+                "ecs:DeleteCluster",
+                "ecs:DescribeClusters",
+                "ecs:PutClusterCapacityProviders",
+                "ecs:TagResource",
+                "ecs:UntagResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CodePipeline",
+            "Effect": "Allow",
+            "Action": [
+                "codepipeline:CreatePipeline",
+                "codepipeline:DeletePipeline",
+                "codepipeline:GetPipeline",
+                "codepipeline:UpdatePipeline",
+                "codepipeline:GetPipelineState",
+                "codepipeline:TagResource",
+                "codepipeline:UntagResource",
+                "codepipeline:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CodeDeploy",
+            "Effect": "Allow",
+            "Action": [
+                "codedeploy:CreateApplication",
+                "codedeploy:DeleteApplication",
+                "codedeploy:GetApplication",
+                "codedeploy:BatchGetApplications",
+                "codedeploy:CreateDeploymentGroup",
+                "codedeploy:DeleteDeploymentGroup",
+                "codedeploy:GetDeploymentGroup",
+                "codedeploy:BatchGetDeploymentGroups",
+                "codedeploy:UpdateDeploymentGroup",
+                "codedeploy:TagResource",
+                "codedeploy:UntagResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EventBridge",
+            "Effect": "Allow",
+            "Action": [
+                "events:PutRule",
+                "events:DeleteRule",
+                "events:DescribeRule",
+                "events:PutTargets",
+                "events:RemoveTargets",
+                "events:ListTargetsByRule",
+                "events:TagResource",
+                "events:UntagResource",
+                "events:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AutoScaling",
+            "Effect": "Allow",
+            "Action": [
+                "application-autoscaling:RegisterScalableTarget",
+                "application-autoscaling:DeregisterScalableTarget",
+                "application-autoscaling:DescribeScalableTargets",
+                "application-autoscaling:PutScalingPolicy",
+                "application-autoscaling:DeleteScalingPolicy",
+                "application-autoscaling:DescribeScalingPolicies",
+                "application-autoscaling:DescribeScalingActivities",
+                "application-autoscaling:DescribeScheduledActions"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CloudWatchAlarms",
+            "Effect": "Allow",
+            "Action": [
+                "cloudwatch:PutMetricAlarm",
+                "cloudwatch:DeleteAlarms",
+                "cloudwatch:DescribeAlarms",
+                "cloudwatch:EnableAlarmActions",
+                "cloudwatch:DisableAlarmActions",
+                "cloudwatch:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CloudWatchLogs",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:DeleteLogGroup",
+                "logs:DescribeLogGroups",
+                "logs:PutRetentionPolicy",
+                "logs:DeleteRetentionPolicy",
+                "logs:TagLogGroup",
+                "logs:TagResource",
+                "logs:ListTagsLogGroup",
+                "logs:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "IAMRoles",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:GetRole",
+                "iam:UpdateRole",
+                "iam:UpdateAssumeRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:GetRolePolicy",
+                "iam:ListRolePolicies",
+                "iam:TagRole",
+                "iam:UntagRole",
+                "iam:ListRoleTags",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy",
+                "iam:ListAttachedRolePolicies"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "IAMOIDCProvider",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateOpenIDConnectProvider",
+                "iam:DeleteOpenIDConnectProvider",
+                "iam:GetOpenIDConnectProvider",
+                "iam:ListOpenIDConnectProviders",
+                "iam:UpdateOpenIDConnectProviderThumbprint",
+                "iam:AddClientIDToOpenIDConnectProvider",
+                "iam:RemoveClientIDFromOpenIDConnectProvider",
+                "iam:TagOpenIDConnectProvider",
+                "iam:UntagOpenIDConnectProvider"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "IAMPassRole",
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "arn:aws:iam::741448927703:role/bem13-*",
+            "Condition": {
+                "StringEquals": {
+                    "iam:PassedToService": [
+                        "ecs-tasks.amazonaws.com",
+                        "codedeploy.amazonaws.com",
+                        "codepipeline.amazonaws.com",
+                        "events.amazonaws.com"
+                    ]
+                }
+            }
+        }
+    ]
+}

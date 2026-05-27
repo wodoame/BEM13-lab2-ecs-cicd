@@ -522,8 +522,8 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-              StringLike:
-                token.actions.githubusercontent.com:sub: !Sub repo:${GithubOrg}/${GithubAppRepo}:*
+              StringEquals:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GithubOrg}/${GithubAppRepo}:ref:refs/heads/main
       Policies:
         - PolicyName: ECRPushAndS3Deploy
           PolicyDocument:
