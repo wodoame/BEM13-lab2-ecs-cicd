@@ -769,8 +769,7 @@ Resources:
           Action: TERMINATE
           TerminationWaitTimeInMinutes: 5
         DeploymentReadyOption:
-          ActionOnTimeout: CONTINUE_DEPLOYMENT
-          WaitTimeInMinutes: 1
+          ActionOnTimeout: CONTINUE_DEPLOYMENT # STOP_DEPLOYMENT (WaitTimeInMinutes will be specified)
       ECSServices:
         - ClusterName: !Ref ECSCluster
           ServiceName: !GetAtt ECSService.Name
