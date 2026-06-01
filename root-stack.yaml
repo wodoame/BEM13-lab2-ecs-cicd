@@ -269,6 +269,7 @@ Resources:
           Value: bem13-lab2-ecs-cicd
 
   # Separate egress rule to avoid circular SG reference at creation time
+  # ALBSecurityGroup references ECSSecurityGroup and vice versa
   ALBSecurityGroupEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
@@ -823,7 +824,7 @@ Resources:
           TerminationWaitTimeInMinutes: 5
         DeploymentReadyOption:
           ActionOnTimeout: CONTINUE_DEPLOYMENT
-          WaitTimeInMinutes: 0
+          WaitTimeInMinutes: 1
       ECSServices:
         - ClusterName: !Ref ECSCluster
           ServiceName: !GetAtt ECSService.Name
@@ -1011,6 +1012,7 @@ Resources:
               RunOrder: 1
 
   # Triggers the pipeline whenever a new image is pushed to ECR
+  # EventBridge Rule
   ECRPushEventRule:
     Type: AWS::Events::Rule
     DependsOn: CodePipeline
