@@ -125,46 +125,6 @@ Resources:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
 
-  EIP1a:
-    Type: AWS::EC2::EIP
-    DependsOn: VPCGatewayAttachment
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: bem13-nat-eip-1a
-
-  EIP1b:
-    Type: AWS::EC2::EIP
-    DependsOn: VPCGatewayAttachment
-    Properties:
-      Domain: vpc
-      Tags:
-        - Key: Name
-          Value: bem13-nat-eip-1b
-
-  NatGateway1a:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt EIP1a.AllocationId
-      SubnetId: !Ref PublicSubnet1a
-      Tags:
-        - Key: Name
-          Value: bem13-nat-gw-1a
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
-
-  NatGateway1b:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt EIP1b.AllocationId
-      SubnetId: !Ref PublicSubnet1b
-      Tags:
-        - Key: Name
-          Value: bem13-nat-gw-1b
-        - Key: Project
-          Value: bem13-lab2-ecs-cicd
-
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -205,13 +165,6 @@ Resources:
         - Key: Project
           Value: bem13-lab2-ecs-cicd
 
-  PrivateRoute1a:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable1a
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway1a
-
   PrivateSubnet1aRTAssoc:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -227,13 +180,6 @@ Resources:
           Value: bem13-private-rt-1b
         - Key: Project
           Value: bem13-lab2-ecs-cicd
-
-  PrivateRoute1b:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable1b
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway1b
 
   PrivateSubnet1bRTAssoc:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -297,7 +243,7 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
-          Description: HTTPS out via VPC endpoints or NAT
+          Description: HTTPS out to AWS services via VPC interface endpoints
       Tags:
         - Key: Name
           Value: bem13-ecs-sg
