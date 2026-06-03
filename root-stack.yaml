@@ -660,7 +660,6 @@ Resources:
           Value: enabled
       CapacityProviders:
         - FARGATE
-        - FARGATE_SPOT
       DefaultCapacityProviderStrategy:
         - CapacityProvider: FARGATE
           Weight: 1
