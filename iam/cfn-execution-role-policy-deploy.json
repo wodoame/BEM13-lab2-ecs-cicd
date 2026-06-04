@@ -162,6 +162,20 @@
             "Resource": "*"
         },
         {
+            "Sid": "CodeBuild",
+            "Effect": "Allow",
+            "Action": [
+                "codebuild:CreateProject",
+                "codebuild:DeleteProject",
+                "codebuild:UpdateProject",
+                "codebuild:BatchGetProjects",
+                "codebuild:TagResource",
+                "codebuild:UntagResource",
+                "codebuild:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
             "Sid": "IAMPassRole",
             "Effect": "Allow",
             "Action": "iam:PassRole",
@@ -172,6 +186,7 @@
                         "ecs-tasks.amazonaws.com",
                         "codedeploy.amazonaws.com",
                         "codepipeline.amazonaws.com",
+                        "codebuild.amazonaws.com",
                         "events.amazonaws.com"
                     ]
                 }
