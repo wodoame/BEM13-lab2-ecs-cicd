@@ -472,7 +472,7 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:sub: !Sub repo:${GithubOrg}/${GithubAppRepo}:ref:refs/heads/main
       Policies:
-        - PolicyName: ECRPushAndS3Deploy
+        - PolicyName: ECRPush
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -489,14 +489,6 @@ Resources:
                   - ecr:BatchGetImage
                   - ecr:GetDownloadUrlForLayer
                 Resource: !GetAtt ECRRepository.Arn
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                  - s3:GetBucketVersioning
-                Resource:
-                  - !Sub arn:aws:s3:::${ArtifactBucket}
-                  - !Sub arn:aws:s3:::${ArtifactBucket}/*
       Tags:
         - Key: Project
           Value: bem13-lab2-ecs-cicd
@@ -620,6 +612,12 @@ Resources:
               - Effect: Allow
                 Action: ecr:DescribeImages
                 Resource: !GetAtt ECRRepository.Arn
+              - Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                  - codebuild:StopBuild
+                Resource: !GetAtt CodeBuildProject.Arn
       Tags:
         - Key: Project
           Value: bem13-lab2-ecs-cicd
@@ -643,6 +641,38 @@ Resources:
               - Effect: Allow
                 Action: codepipeline:StartPipelineExecution
                 Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:bem13-lab2-pipeline
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: bem13-codebuild-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodeBuildPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/bem13-lab2-generate-deploy-files:*
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                Resource: !Sub arn:aws:s3:::${ArtifactBucket}/*
       Tags:
         - Key: Project
           Value: bem13-lab2-ecs-cicd
@@ -872,6 +902,77 @@ Resources:
   # Pipeline Infrastructure
   # ============================================================
 
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: bem13-lab2-generate-deploy-files
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: EXECUTION_ROLE_ARN
+            Value: !GetAtt ECSTaskExecutionRole.Arn
+          - Name: TASK_ROLE_ARN
+            Value: !GetAtt ECSTaskRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            build:
+              commands:
+                - |
+                  jq -n \
+                    --arg exec "$EXECUTION_ROLE_ARN" \
+                    --arg task "$TASK_ROLE_ARN" \
+                    --arg region "$AWS_DEFAULT_REGION" \
+                    '{
+                      family: "bem13-lab2-app",
+                      networkMode: "awsvpc",
+                      requiresCompatibilities: ["FARGATE"],
+                      cpu: "256",
+                      memory: "512",
+                      executionRoleArn: $exec,
+                      taskRoleArn: $task,
+                      containerDefinitions: [{
+                        name: "bem13-lab2-app",
+                        image: "<IMAGE1_NAME>",
+                        essential: true,
+                        portMappings: [{containerPort: 8080, protocol: "tcp"}],
+                        logConfiguration: {
+                          logDriver: "awslogs",
+                          options: {
+                            "awslogs-group": "/ecs/bem13-lab2-app",
+                            "awslogs-region": $region,
+                            "awslogs-stream-prefix": "ecs"
+                          }
+                        }
+                      }]
+                    }' > taskdef.json
+                - |
+                  cat > appspec.yaml << 'EOF'
+                  version: 0.0
+                  Resources:
+                    - TargetService:
+                        Type: AWS::ECS::Service
+                        Properties:
+                          TaskDefinition: <TASK_DEFINITION>
+                          LoadBalancerInfo:
+                            ContainerName: "bem13-lab2-app"
+                            ContainerPort: 8080
+                  EOF
+          artifacts:
+            files:
+              - taskdef.json
+              - appspec.yaml
+      Artifacts:
+        Type: CODEPIPELINE
+      Tags:
+        - Key: Project
+          Value: bem13-lab2-ecs-cicd
+
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -920,16 +1021,18 @@ Resources:
               OutputArtifacts:
                 - Name: ImageArtifact
               RunOrder: 1
-            - Name: S3-Deploy-Config
+        - Name: Build
+          Actions:
+            - Name: GenerateDeployFiles
               ActionTypeId:
-                Category: Source
+                Category: Build
                 Owner: AWS
-                Provider: S3
+                Provider: CodeBuild
                 Version: '1'
               Configuration:
-                S3Bucket: !Ref ArtifactBucket
-                S3ObjectKey: deploy/deploy-bundle.zip
-                PollForSourceChanges: 'false'
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: ImageArtifact
               OutputArtifacts:
                 - Name: DeployArtifact
               RunOrder: 1
