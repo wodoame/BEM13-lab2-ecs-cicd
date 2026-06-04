@@ -586,6 +586,7 @@ Resources:
                   - codedeploy:CreateDeployment
                   - codedeploy:GetDeployment
                   - codedeploy:GetDeploymentConfig
+                  - codedeploy:GetApplication
                   - codedeploy:RegisterApplicationRevision
                   - codedeploy:GetApplicationRevision
                 Resource: '*'
