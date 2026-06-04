@@ -168,10 +168,7 @@
                 "codebuild:CreateProject",
                 "codebuild:DeleteProject",
                 "codebuild:UpdateProject",
-                "codebuild:BatchGetProjects",
-                "codebuild:TagResource",
-                "codebuild:UntagResource",
-                "codebuild:ListTagsForResource"
+                "codebuild:BatchGetProjects"
             ],
             "Resource": "*"
         },
